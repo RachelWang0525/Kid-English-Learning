@@ -123,6 +123,47 @@ h1{text-align:center;font-size:26px;margin:8px 0 14px;background:linear-gradient
 .opt-btn.correct{background:linear-gradient(135deg,#d3f9d8,#b2f2bb);border-color:#51cf66;color:#2f9e44;}
 .opt-btn.wrong{background:linear-gradient(135deg,#ffe3e3,#ffc9c9);border-color:#ff6b6b;color:#c92a2a;}
 .opt-btn:active{transform:scale(0.97);}
+
+/* ===== 游戏页 ===== */
+.game-menu{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.game-card{background:#fff;border-radius:24px;padding:24px 12px;text-align:center;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.08);transition:all 0.2s;}
+.game-card:active{transform:scale(0.96);}
+.game-emoji{font-size:54px;margin-bottom:8px;}
+.game-title{font-size:18px;font-weight:800;color:#333;margin-bottom:6px;}
+.game-desc{font-size:12px;color:#999;line-height:1.4;}
+.game-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.game-back{background:#fff;border:none;border-radius:20px;padding:10px 16px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,0.06);color:#666;}
+.game-back:active{transform:scale(0.95);}
+.game-info{display:flex;gap:8px;align-items:center;}
+.game-score,.game-timer{background:#fff;border-radius:20px;padding:8px 14px;font-size:14px;font-weight:700;box-shadow:0 3px 8px rgba(0,0,0,0.06);}
+.game-timer{color:#ff6b6b;}
+.game-score{color:#51cf66;}
+
+/* ===== 翻牌连连看 ===== */
+.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.mem-card{aspect-ratio:1;border-radius:16px;perspective:600px;cursor:pointer;position:relative;}
+.mem-card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 0.5s;}
+.mem-card.flipped .mem-card-inner{transform:rotateY(180deg);}
+.mem-card.matched .mem-card-inner{transform:rotateY(180deg);}
+.mem-card.matched .mem-back{background:linear-gradient(135deg,#d3f9d8,#b2f2bb);box-shadow:0 0 0 3px #51cf66;}
+.mem-face{position:absolute;width:100%;height:100%;border-radius:16px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;font-weight:800;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+.mem-front{background:linear-gradient(135deg,#ff9a56,#ff6b6b);font-size:28px;color:#fff;}
+.mem-back{background:#fff;transform:rotateY(180deg);flex-direction:column;gap:4px;font-size:14px;color:#333;font-family:"Comic Sans MS",cursive;}
+.mem-back .mem-emoji{font-size:32px;}
+.mem-card.wrong .mem-back{background:linear-gradient(135deg,#ffe3e3,#ffc9c9);}
+
+/* ===== 打地鼠 ===== */
+.whack-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px;}
+.whack-hole{aspect-ratio:1;background:linear-gradient(180deg,#8B4513 0%,#5D2F0D 100%);border-radius:50% 50% 20% 20%/60% 60% 20% 20%;position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;box-shadow:inset 0 8px 16px rgba(0,0,0,0.3);}
+.whack-mole{position:absolute;width:80%;height:0%;bottom:0;display:flex;align-items:center;justify-content:center;font-size:48px;border-radius:50% 50% 20% 20%;transition:height 0.25s ease-out;background:linear-gradient(180deg,#ffd8a8,#fab005);cursor:pointer;user-select:none;}
+.whack-mole.up{height:75%;}
+.whack-mole:active{transform:scale(0.9);}
+.whack-mole.hit{background:linear-gradient(180deg,#b2f2bb,#51cf66);}
+.whack-mole.bomb-hit{background:linear-gradient(180deg,#ffc9c9,#ff6b6b);}
+.whack-target{background:#fff;border-radius:24px;padding:16px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,0.08);margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:10px;}
+.whack-target-emoji{font-size:44px;}
+.whack-target-word{font-size:26px;font-weight:800;font-family:"Comic Sans MS",cursive;color:#333;}
+.whack-speaker{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ffe0cc,#ffccb3);border:none;font-size:22px;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,0.1);}
 </style>
 </head>
 <body>
@@ -130,12 +171,13 @@ h1{text-align:center;font-size:26px;margin:8px 0 14px;background:linear-gradient
   <div class="top">
     <div class="stars-box">⭐ <span id="stars">0</span></div>
     <button class="checkin-btn" id="checkinBtn" onclick="doCheckin()">📅 今日打卡</button>
-    <div class="streak-box">🔥<span class="streak-num" id="streak">0</span>天</div>
+    <div class="streak-box" style="cursor:pointer" onclick="goToAward()" title="查看日历">🔥<span class="streak-num" id="streak">0</span>天</div>
   </div>
   <h1>🌈 Lucas学英语</h1>
 
   <div class="nav-tabs">
     <button class="nav-tab active" data-page="learn">📖 学习</button>
+    <button class="nav-tab" data-page="games">🎮 游戏</button>
     <button class="nav-tab" data-page="award">🏆 奖励</button>
   </div>
 
@@ -149,6 +191,23 @@ h1{text-align:center;font-size:26px;margin:8px 0 14px;background:linear-gradient
     <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
     <div class="card" id="card"></div>
     <div class="feedback" id="fb"></div>
+  </div>
+
+  <div id="page-games" style="display:none;">
+    <div class="cats" id="gameCats"></div>
+    <div class="game-menu" id="gameMenu">
+      <div class="game-card" onclick="startGame('memory')">
+        <div class="game-emoji">🔀</div>
+        <div class="game-title">翻牌连连看</div>
+        <div class="game-desc">翻开卡牌，配对emoji和单词</div>
+      </div>
+      <div class="game-card" onclick="startGame('whack')">
+        <div class="game-emoji">🔨</div>
+        <div class="game-title">打地鼠</div>
+        <div class="game-desc">听声音，快速点对地鼠！</div>
+      </div>
+    </div>
+    <div id="gameArea" style="display:none;"></div>
   </div>
 
   <div id="page-award" style="display:none;">
@@ -754,9 +813,16 @@ function levDist(a,b){
   return dp[m][n];
 }
 
+function goToAward(){
+  document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+  document.querySelector('.nav-tab[data-page="award"]').classList.add('active');
+  document.getElementById('page-learn').style.display='none';
+  document.getElementById('page-award').style.display='block';
+  renderCal();renderStickers();
+}
 function doCheckin(){
   const t=todayStr();
-  if(state.checkins[t])return; // 已打卡
+  if(state.checkins[t]){goToAward();return;} // 已打卡就跳去日历
   state.checkins[t]=true;
   updateStreak();
   state.todayDone=true;
@@ -867,13 +933,264 @@ document.querySelectorAll('.nav-tab').forEach(b=>{
     document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');const p=b.dataset.page;
     document.getElementById('page-learn').style.display=p==='learn'?'block':'none';
+    document.getElementById('page-games').style.display=p==='games'?'block':'none';
     document.getElementById('page-award').style.display=p==='award'?'block':'none';
     if(p==='award'){renderCal();renderStickers();}
+    if(p==='games'){stopGame();document.getElementById('gameMenu').style.display='grid';document.getElementById('gameArea').style.display='none';renderGameCats();}
   };
 });
 
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;});
+
+// ========== 游戏通用 ==========
+let gameState=null,gameTimer=null,gameInterval=null;
+function renderGameCats(){
+  const el=document.getElementById('gameCats');
+  if(!el)return;
+  el.innerHTML=Object.entries(WORDS).map(([k,v])=>`
+    <div class="cat ${k===curCat?'active':''}" data-cat="${k}" onclick="switchGameCat('${k}')">
+      <div class="cat-icon">${v.icon}</div>
+      <div class="cat-name">${v.name}</div>
+      <div class="cat-count">${v.list.length}个</div>
+    </div>
+  `).join('');
+}
+function switchGameCat(k){
+  curCat=k;curSentence=null;loadList(curCat);
+  renderCats();renderGameCats();
+  // 如果正在游戏中，重启游戏
+  if(gameState&&gameState.type){
+    startGame(gameState.type);
+  }
+}
+function stopGame(){
+  if(gameTimer){clearTimeout(gameTimer);gameTimer=null;}
+  if(gameInterval){clearInterval(gameInterval);gameInterval=null;}
+  gameState=null;
+}
+function startGame(type){
+  document.getElementById('gameMenu').style.display='none';
+  document.getElementById('gameArea').style.display='block';
+  stopGame();
+  if(type==='memory')startMemoryGame();
+  else if(type==='whack')startWhackGame();
+}
+function exitGame(){
+  stopGame();
+  document.getElementById('gameMenu').style.display='grid';
+  document.getElementById('gameArea').style.display='none';
+}
+
+// ========== 翻牌连连看 ==========
+function startMemoryGame(){
+  // 选6对（共12张牌），从当前分类随机
+  const pairs=pickN(WORDS[curCat].list,6);
+  // 每张牌要么是emoji面，要么是单词面，配对算成功
+  let cards=[];
+  pairs.forEach((w,i)=>{
+    cards.push({id:i,type:'emoji',word:w,match:i});
+    cards.push({id:i,type:'word',word:w,match:i});
+  });
+  cards=shuffle(cards);
+  gameState={type:'memory',cards,flipped:[],matched:0,moves:0,total:pairs.length,locked:false};
+
+  const area=document.getElementById('gameArea');
+  area.innerHTML=`
+    <div class="game-top">
+      <button class="game-back" onclick="exitGame()">◀ 返回</button>
+      <div class="game-info">
+        <div class="game-score">⭐ <span id="memScore">0</span>/${pairs.length}</div>
+        <div class="game-timer">👆 <span id="memMoves">0</span>次</div>
+      </div>
+    </div>
+    <div class="memory-grid" id="memGrid"></div>
+    <p class="hint">🔀 翻开两张牌，emoji和单词配一对！</p>
+  `;
+  renderMemoryGrid();
+}
+function renderMemoryGrid(){
+  const g=document.getElementById('memGrid');
+  g.innerHTML=gameState.cards.map((c,i)=>`
+    <div class="mem-card" data-i="${i}" onclick="flipMemCard(${i})">
+      <div class="mem-card-inner">
+        <div class="mem-face mem-front">?</div>
+        <div class="mem-face mem-back">
+          ${c.type==='emoji'
+            ? `<span class="mem-emoji">${c.word[2]}</span>`
+            : `<span style="font-size:20px;font-weight:800;">${c.word[0]}</span>`}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function flipMemCard(i){
+  const gs=gameState;if(!gs||gs.locked)return;
+  const card=document.querySelectorAll('.mem-card')[i];
+  if(card.classList.contains('flipped')||card.classList.contains('matched'))return;
+  card.classList.add('flipped');
+  gs.flipped.push(i);
+  if(gs.flipped.length===2){
+    gs.moves++;
+    document.getElementById('memMoves').textContent=gs.moves;
+    gs.locked=true;
+    const [a,b]=gs.flipped;
+    const ca=gs.cards[a],cb=gs.cards[b];
+    const cards=document.querySelectorAll('.mem-card');
+    if(ca.match===cb.match&&ca.type!==cb.type){
+      // 配对成功
+      cards[a].classList.add('matched');
+      cards[b].classList.add('matched');
+      gs.matched++;
+      document.getElementById('memScore').textContent=gs.matched;
+      addStar();
+      speak(ca.word[0],{rate:0.8});
+      setTimeout(()=>{
+        gs.flipped=[];gs.locked=false;
+        if(gs.matched===gs.total){
+          // 通关
+          fireConfetti();
+          document.getElementById('celTitle').textContent='🎉 全部配对成功！';
+          document.getElementById('celText').textContent=`用了${gs.moves}次翻牌，太厉害了！`;
+          document.getElementById('cel').classList.add('show');
+          // 重定义关闭按钮行为
+          window._celCloseAction=()=>{exitGame();};
+        }
+      },500);
+    }else{
+      // 配对失败
+      cards[a].classList.add('wrong');
+      cards[b].classList.add('wrong');
+      setTimeout(()=>{
+        cards[a].classList.remove('flipped','wrong');
+        cards[b].classList.remove('flipped','wrong');
+        gs.flipped=[];gs.locked=false;
+      },900);
+    }
+  }
+}
+
+// ========== 打地鼠 ==========
+function startWhackGame(){
+  gameState={type:'whack',score:0,round:0,totalRounds:15,target:null,moles:[],moleTimer:null,roundActive:false};
+  const area=document.getElementById('gameArea');
+  area.innerHTML=`
+    <div class="game-top">
+      <button class="game-back" onclick="exitGame()">◀ 返回</button>
+      <div class="game-info">
+        <div class="game-score">⭐ <span id="whackScore">0</span></div>
+        <div class="game-timer">🎯 <span id="whackRound">0</span>/${gameState.totalRounds}</div>
+      </div>
+    </div>
+    <div class="whack-target">
+      <button class="whack-speaker" onclick="speakWhackTarget()">🔊</button>
+      <div class="whack-target-word" id="whackWord">听一听！</div>
+    </div>
+    <div class="whack-grid" id="whackGrid"></div>
+    <p class="hint">🔨 听到单词后，快点那个地鼠！</p>
+  `;
+  // 9个洞
+  const g=document.getElementById('whackGrid');
+  for(let i=0;i<9;i++){
+    g.innerHTML+=`<div class="whack-hole"><div class="whack-mole" data-i="${i}" onclick="whackMole(${i})"></div></div>`;
+  }
+  nextWhackRound();
+}
+function speakWhackTarget(){
+  if(!gameState||!gameState.target)return;
+  speak(gameState.target[0],{rate:0.75});
+}
+function nextWhackRound(){
+  const gs=gameState;if(!gs)return;
+  gs.round++;
+  if(gs.round>gs.totalRounds){
+    // 结束
+    fireConfetti();
+    document.getElementById('celTitle').textContent='🎉 游戏结束！';
+    document.getElementById('celText').textContent=`打到了${gs.score}个，真棒！`;
+    document.getElementById('cel').classList.add('show');
+    window._celCloseAction=()=>{exitGame();};
+    return;
+  }
+  document.getElementById('whackRound').textContent=gs.round;
+  // 选目标词和3个干扰词
+  const target=pick(WORDS[curCat].list);
+  gs.target=target;
+  document.getElementById('whackWord').textContent=target[0];
+  // 4个洞有地鼠，1个是对的
+  const positions=pickN([0,1,2,3,4,5,6,7,8],4);
+  const correctPos=positions[Math.floor(Math.random()*positions.length)];
+  // 其他位置放其他词
+  const distractors=pickN(WORDS[curCat].list.filter(w=>w[0]!==target[0]),3);
+  gs.moles=new Array(9).fill(null);
+  gs.moles[correctPos]={word:target,correct:true};
+  let di=0;
+  positions.forEach(p=>{
+    if(p!==correctPos){gs.moles[p]={word:distractors[di],correct:false};di++;}
+  });
+  gs.roundActive=true;
+  // 重置地鼠
+  document.querySelectorAll('.whack-mole').forEach(m=>{
+    m.classList.remove('up','hit','bomb-hit');
+    m.textContent='';
+  });
+  // 地鼠冒起来
+  setTimeout(()=>{
+    positions.forEach((p,idx)=>{
+      const m=document.querySelectorAll('.whack-mole')[p];
+      setTimeout(()=>{
+        m.textContent=gs.moles[p].word[2];
+        m.classList.add('up');
+      },idx*200);
+    });
+    // 先播放发音
+    setTimeout(()=>speak(target[0],{rate:0.75}),600);
+  },300);
+  // 时间到（2秒后地鼠下去）
+  gameTimer=setTimeout(()=>{
+    if(!gs.roundActive)return;
+    gs.roundActive=false;
+    document.querySelectorAll('.whack-mole').forEach(m=>{
+      m.classList.remove('up');
+      setTimeout(()=>{m.textContent='';m.classList.remove('hit','bomb-hit');},250);
+    });
+    setTimeout(nextWhackRound,800);
+  },3500);
+}
+function whackMole(i){
+  const gs=gameState;if(!gs||!gs.roundActive)return;
+  const mole=gs.moles[i];
+  if(!mole)return;
+  const mEl=document.querySelectorAll('.whack-mole')[i];
+  if(!mEl.classList.contains('up'))return;
+  gs.roundActive=false;
+  clearTimeout(gameTimer);
+  if(mole.correct){
+    mEl.classList.add('hit');
+    gs.score++;
+    document.getElementById('whackScore').textContent=gs.score;
+    addStar();
+    speak(mole.word[0],{rate:0.8});
+  }else{
+    mEl.classList.add('bomb-hit');
+  }
+  // 其他地鼠下去
+  setTimeout(()=>{
+    document.querySelectorAll('.whack-mole').forEach(m=>{
+      m.classList.remove('up');
+      setTimeout(()=>{m.textContent='';m.classList.remove('hit','bomb-hit');},250);
+    });
+    setTimeout(nextWhackRound,800);
+  },600);
+}
+
+// 覆盖closeCel使其支持游戏结束回调
+const origCloseCel=closeCel;
+closeCel=function(){
+  document.getElementById('cel').classList.remove('show');
+  if(window._celCloseAction){const a=window._celCloseAction;window._celCloseAction=null;a();return;}
+  origCloseCel();
+};
 
 loadList(curCat);renderCats();render();renderTop();
 </script>
