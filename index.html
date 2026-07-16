@@ -289,16 +289,10 @@ const SENTENCES={
       hint:'看颜色，说出答案'
     },
     {
-      q:'What colors do you see?',
-      a:'I see ___.',
+      q:'I see something ___.',
+      a:'It is ___!',
       mode:'speak',
       hint:'你看到了什么颜色？'
-    },
-    {
-      q:'Can you find something ___?',
-      a:'Here it is!',
-      mode:'choose',
-      hint:'找一找那个颜色的东西'
     },
   ],
   animals:[
@@ -332,12 +326,6 @@ const SENTENCES={
       hint:'它会飞吗？',
       yesNo:true
     },
-    {
-      q:'Are ___ big?',
-      a:'Yes, ___ are big.',
-      mode:'speak',
-      hint:'用Yes回答'
-    },
   ],
   numbers:[
     {
@@ -347,15 +335,15 @@ const SENTENCES={
       hint:'这是数字几？'
     },
     {
-      q:'How many ___ are there?',
+      q:'How many?',
       a:'There are ___.',
       mode:'count',
-      hint:'数一数有多少个'
+      hint:'数一数有多少个？'
     },
     {
       q:'Can you show me number ___?',
       a:'I can show you number ___!',
-      mode:'show',
+      mode:'speak',
       hint:'用手指表示数字'
     },
   ]
@@ -460,11 +448,20 @@ function genSentence(){
   const [w_en,w_cn,w_emoji]=word;
   let q=sent.q,a=sent.a,options=null,showAnswer=false,place=null;
   const art=aOrAn(w_en);
+  let countEmojis=null;
 
   // 问句显示：把 ___ 替换为空白横线
   if(sent.prependAAn){
-    // "This is ___ ___." → "This is _____."
     q=q.replace('___ ___','<span style="color:#ff6b6b;font-weight:800">_____</span>');
+  }else if(sent.mode==='count'){
+    // 数一数模式：答案就是当前数字词，显示对应数量的emoji
+    const numMap={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
+    const countN=numMap[w_en]||1;
+    const emojiPool=WORDS.animals.list.map(x=>x[2]).concat(['🍎','🍌','🍊','⚽','🌟','🎈','🦋','🌸']);
+    const itemEmoji=pick(emojiPool);
+    countEmojis={n:countN,emoji:itemEmoji};
+    q=`How many?`;
+    a=a.replace('___',`<b>${w_en}</b>`);
   }else{
     q=q.replace('___',`<span style="color:#ff6b6b;font-weight:800">_____</span>`);
   }
@@ -479,12 +476,11 @@ function genSentence(){
       place=pick(sent.places);
       const others=pickN(sent.places.filter(p=>p[0]!==place[0]),3);
       options=shuffle([place,...others]).map(p=>({text:p[1]+' '+p[0],val:p[0],emoji:p[1]}));
-      // A/An + 单词 + 地点
       const artCap=art.charAt(0).toUpperCase()+art.slice(1);
       a=a.replace('A/An',artCap).replace('___',`<b>${w_en}</b>`).replace('__place__',`<b>${place[0]}</b>`);
     }
-  }else{
-    // 非选择题：在答案里替换
+  }else if(sent.mode!=='count'){
+    // 非选择题/非数一数：答案替换
     if(sent.prependAAn){
       a=a.replace('___ ___',`<b>${art} ${w_en}</b>`);
     }else{
@@ -493,7 +489,7 @@ function genSentence(){
   }
 
   curSentence={
-    ...sent,word,displayQ:q,displayA:a,options,place,
+    ...sent,word,displayQ:q,displayA:a,options,place,countEmojis,
     qRaw:sent.q,aRaw:sent.a,
     answered:false,correct:false
   };
@@ -560,7 +556,29 @@ function renderSentence(card){
   const s=curSentence;const [w_en,w_cn,w_emoji]=s.word;
   let html=`<button class="shuffle" onclick="shuffleWord()" title="换一个">🔀</button>`;
 
-  if(s.mode==='speak'||s.mode==='act'){
+  // 数一数模式
+  if(s.mode==='count'&&s.countEmojis){
+    const ce=s.countEmojis;
+    const emojis=ce.emoji.repeat(ce.n);
+    const answerEn=`There are ${w_en}.`;
+    html+=`<button class="speaker" onclick="speak('${answerEn.replace(/'/g,"\\'")}',{rate:0.7})">🔊</button>
+      <div class="sentence-step">
+        <div style="font-size:42px;letter-spacing:4px;margin:14px 0;line-height:1.3;text-align:center;word-break:break-all;">${emojis}</div>
+        <div class="q-text">How many?</div>
+        <div class="card-cn">${s.hint}</div>
+        <button class="big-btn btn-hear" onclick="showCountAnswer()" style="margin-top:8px;width:100%;">👀 看答案</button>
+        <div id="countAnswerArea" class="hidden" style="width:100%;text-align:center;">
+          <div class="card-sentence" style="color:#51cf66;margin-top:10px;font-size:22px;">${answerEn}</div>
+          <div class="btns" style="margin-top:10px;width:100%;">
+            <button class="big-btn btn-speak" id="recBtn" onclick="toggleRecSentence()" style="flex:1;">🎤 跟我读</button>
+          </div>
+        </div>
+      </div>`;
+    setTimeout(()=>speak('How many?',{rate:0.7}),300);
+    card.innerHTML=html;return;
+  }
+
+  if(s.mode==='speak'||s.mode==='act'||s.mode==='show'){
     // 跟读/表演模式
     const aFull=fillSentenceRaw(s.aRaw,w_en);
     // 构造朗读用的完整问句
@@ -602,21 +620,48 @@ function renderSentence(card){
         </div>
       </div>`;
     setTimeout(()=>speak(qSpeak,{rate:0.7}),300);
+  }else{
+    // 兜底：未知模式按speak跟读处理
+    const aFull=fillSentenceRaw(s.aRaw,w_en);
+    let qSpeak=s.qRaw;
+    if(s.prependAAn){qSpeak=s.qRaw.replace('___ ___',`${aOrAn(w_en)} ${w_en}`);}
+    else{qSpeak=s.qRaw.replace(/___/g,w_en);}
+    html+=`<button class="speaker" onclick="speakSentence()">🔊</button>
+      <div class="sentence-step">
+        <div class="q-icon">${w_emoji}</div>
+        <div class="q-text">${s.displayQ||s.qRaw.replace(/___/g,w_en)}</div>
+        <div class="card-cn">${s.hint||''}</div>
+        <button class="big-btn btn-hear" onclick="showAnswerSpeak()" style="margin-top:8px;width:100%;">👀 看答案</button>
+        <div id="answerArea" class="hidden" style="width:100%;text-align:center;">
+          <div class="card-sentence" style="color:#51cf66;margin-top:10px;font-size:22px;">${aFull}</div>
+          <div class="btns" style="margin-top:10px;width:100%;">
+            <button class="big-btn btn-speak" id="recBtn" onclick="toggleRecSentence()" style="flex:1;">🎤 跟我读</button>
+          </div>
+        </div>
+      </div>`;
+    setTimeout(()=>speak(qSpeak,{rate:0.7}),300);
   }
   card.innerHTML=html;
 
   // 渲染选项
   if(s.mode==='choose'&&s.options&&!s.answered){
     const optArea=document.getElementById('optArea');
-    optArea.innerHTML=s.options.map((o,i)=>`
-      <button class="opt-btn" data-val="${o.val}" data-i="${i}">
-        ${o.emoji?`<span class="opt-emoji">${o.emoji}</span>`:''}
-        <span>${o.text}</span>
-      </button>`).join('');
-    optArea.querySelectorAll('.opt-btn').forEach(b=>{
-      b.onclick=()=>checkChoose(b.dataset.val,b);
-    });
+    if(optArea){
+      optArea.innerHTML=s.options.map((o,i)=>`
+        <button class="opt-btn" data-val="${o.val}" data-i="${i}">
+          ${o.emoji?`<span class="opt-emoji">${o.emoji}</span>`:''}
+          <span>${o.text}</span>
+        </button>`).join('');
+      optArea.querySelectorAll('.opt-btn').forEach(b=>{
+        b.onclick=()=>checkChoose(b.dataset.val,b);
+      });
+    }
   }
+}
+function showCountAnswer(){
+  document.getElementById('countAnswerArea').classList.remove('hidden');
+  const s=curSentence;const [w_en]=s.word;
+  setTimeout(()=>speak(`There are ${w_en}`,{rate:0.7}),300);
 }
 
 function fillSentenceRaw(tpl,w_en,place){
