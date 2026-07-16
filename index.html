@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ff9a56">
+<title>🌟 小朋友英语乐园</title>
+<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;英语乐园&quot;,&quot;short_name&quot;:&quot;英语&quot;,&quot;start_url&quot;:&quot;./index.html&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23fff5e6&quot;,&quot;theme_color&quot;:&quot;%23ff9a56&quot;}">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+body{font-family:"Comic Sans MS","Chalkboard SE","PingFang SC",sans-serif;background:linear-gradient(135deg,#fff5e6 0%,#ffe0cc 50%,#ffd1b3 100%);min-height:100vh;overflow-x:hidden;}
+.app{max-width:500px;margin:0 auto;padding:16px;min-height:100vh;}
+
+/* 顶部 */
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.stars-box{background:#fff;border-radius:30px;padding:8px 16px;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(255,154,86,0.3);font-weight:700;font-size:20px;color:#ff9a56;}
+.streak-box{background:#fff;border-radius:30px;padding:8px 14px;display:flex;align-items:center;gap:4px;box-shadow:0 3px 10px rgba(255,154,86,0.3);font-size:14px;color:#666;}
+.streak-num{color:#ff6b6b;font-weight:700;font-size:18px;}
+
+h1{text-align:center;font-size:28px;margin:8px 0 14px;background:linear-gradient(135deg,#ff6b6b,#ffa500,#ffdd00,#51cf66,#339af0,#cc5de8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900;text-shadow:0 2px 4px rgba(0,0,0,0.1);}
+
+/* 分类选择 */
+.cats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px;}
+.cat{background:#fff;border-radius:20px;padding:16px 8px;text-align:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:all 0.2s;border:3px solid transparent;}
+.cat:active{transform:scale(0.95);}
+.cat.active{border-color:#ff9a56;transform:scale(1.02);box-shadow:0 6px 16px rgba(255,154,86,0.4);}
+.cat-icon{font-size:44px;margin-bottom:6px;}
+.cat-name{font-size:16px;font-weight:700;color:#333;}
+.cat-en{font-size:11px;color:#999;margin-top:2px;}
+.cat-count{font-size:11px;color:#ff9a56;margin-top:4px;}
+
+/* 模式切换 */
+.modes{display:flex;gap:8px;margin-bottom:16px;}
+.mode-btn{flex:1;background:#fff;border:none;border-radius:16px;padding:10px;font-size:14px;font-weight:700;font-family:inherit;color:#666;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,0.06);transition:all 0.2s;}
+.mode-btn.active{background:linear-gradient(135deg,#ff9a56,#ff6b6b);color:#fff;box-shadow:0 4px 12px rgba(255,107,107,0.4);}
+.mode-btn:active{transform:scale(0.97);}
+
+/* 卡片 */
+.card{background:#fff;border-radius:28px;padding:24px 20px;box-shadow:0 8px 24px rgba(0,0,0,0.1);margin-bottom:14px;position:relative;overflow:hidden;}
+.card-img{width:160px;height:160px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:120px;border-radius:50%;background:linear-gradient(135deg,#fff4e6,#ffe0cc);animation:breathe 2s ease-in-out infinite;}
+@keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.05);}}
+.card-word{text-align:center;font-size:42px;font-weight:800;color:#333;letter-spacing:2px;margin-bottom:6px;font-family:"Comic Sans MS",cursive;}
+.card-py{text-align:center;font-size:18px;color:#999;margin-bottom:4px;}
+.card-cn{text-align:center;font-size:16px;color:#666;}
+.speaker{position:absolute;top:16px;right:16px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#ffe0cc,#ffccb3);border:none;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,0.1);}
+.speaker:active{transform:scale(0.9);}
+
+/* 进度 */
+.progress-bar{height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden;margin-bottom:14px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#51cf66,#ffd43b,#ff9a56);border-radius:4px;transition:width 0.4s;}
+
+/* 按钮 */
+.btns{display:flex;gap:10px;}
+.big-btn{flex:1;padding:18px;border:none;border-radius:20px;font-size:20px;font-weight:800;cursor:pointer;font-family:inherit;transition:all 0.15s;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
+.big-btn:active{transform:translateY(2px);box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+.btn-hear{background:linear-gradient(135deg,#51cf66,#40c057);color:#fff;}
+.btn-speak{background:linear-gradient(135deg,#339af0,#228be6);color:#fff;}
+.btn-speak.rec{background:linear-gradient(135deg,#ff6b6b,#fa5252);animation:pulse 1.2s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,107,107,0.5);}70%{box-shadow:0 0 0 14px rgba(255,107,107,0);}100%{box-shadow:0 0 0 0 rgba(255,107,107,0);}}
+.btn-nav{background:#fff;color:#666;font-size:16px;flex:0.3;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+
+/* 反馈 */
+.feedback{text-align:center;padding:16px;border-radius:20px;margin-top:12px;font-size:22px;font-weight:800;display:none;animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes popIn{from{transform:scale(0.3);opacity:0;}to{transform:scale(1);opacity:1;}}
+.feedback.good{background:linear-gradient(135deg,#d3f9d8,#b2f2bb);color:#2f9e44;}
+.feedback.bad{background:linear-gradient(135deg,#fff3bf,#ffec99);color:#e67700;}
+.feedback .emoji{font-size:40px;display:block;margin-bottom:4px;}
+
+/* 完成庆祝 */
+.celebrate{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:999;display:none;align-items:center;justify-content:center;}
+.celebrate.show{display:flex;}
+.celebrate-box{background:linear-gradient(135deg,#fff9db,#fff);border-radius:30px;padding:32px 24px;text-align:center;max-width:340px;width:90%;animation:pop 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes pop{from{transform:scale(0.3);opacity:0;}to{transform:scale(1);opacity:1;}}
+.celebrate-emoji{font-size:80px;margin-bottom:10px;animation:spin 1s ease;}
+@keyframes spin{from{transform:rotate(-180deg) scale(0.3);}to{transform:rotate(0) scale(1);}}
+.celebrate h2{font-size:28px;background:linear-gradient(135deg,#ff6b6b,#ffa500,#51cf66,#339af0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:10px;}
+.celebrate p{color:#666;font-size:16px;margin-bottom:20px;}
+.celebrate-btn{background:linear-gradient(135deg,#ff9a56,#ff6b6b);color:#fff;border:none;padding:14px 40px;border-radius:30px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(255,107,107,0.4);}
+.celebrate-btn:active{transform:scale(0.96);}
+
+/* 粒子效果 */
+.confetti{position:fixed;width:12px;height:12px;border-radius:3px;z-index:1000;pointer-events:none;}
+
+/* 打卡日历 */
+.cal{background:#fff;border-radius:20px;padding:16px;box-shadow:0 4px 16px rgba(0,0,0,0.08);}
+.cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.cal-head button{background:#fff1e6;border:none;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;}
+.cal-head h3{font-size:16px;color:#333;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-dow{text-align:center;font-size:11px;color:#aaa;padding:4px;font-weight:700;}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:12px;position:relative;}
+.cal-day.today{background:#fff1e6;color:#ff9a56;font-weight:700;}
+.cal-day.done{background:linear-gradient(135deg,#ff9a56,#ff6b6b);color:#fff;font-weight:700;}
+.cal-day .star{position:absolute;top:-4px;right:-4px;font-size:12px;}
+
+.nav-tabs{display:flex;gap:8px;margin-bottom:14px;}
+.nav-tab{flex:1;background:#fff;border:none;border-radius:14px;padding:10px;font-size:14px;font-weight:700;font-family:inherit;color:#999;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+.nav-tab.active{background:linear-gradient(135deg,#ff9a56,#ff6b6b);color:#fff;}
+
+.sticker-wall{background:#fff;border-radius:20px;padding:16px;box-shadow:0 4px 16px rgba(0,0,0,0.08);margin-top:12px;}
+.sticker-wall h3{font-size:15px;color:#333;margin-bottom:10px;text-align:center;}
+.stickers{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.sticker{font-size:34px;filter:grayscale(1);opacity:0.3;transition:all 0.3s;}
+.sticker.got{filter:none;opacity:1;animation:bounce 0.6s;}
+@keyframes bounce{0%,100%{transform:scale(1);}50%{transform:scale(1.3);}}
+
+.hint{text-align:center;color:#999;font-size:12px;margin-top:12px;line-height:1.6;}
+.again-btn{background:#fff;border:2px solid #ffd43b;color:#f08c00;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:700;cursor:pointer;margin-top:10px;font-family:inherit;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="stars-box">⭐ <span id="stars">0</span></div>
+    <div class="streak-box">🔥<span class="streak-num" id="streak">0</span>天</div>
+  </div>
+  <h1>🌈 Hello! 小朋友英语</h1>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-page="learn">📖 学习</button>
+    <button class="nav-tab" data-page="award">🏆 奖励</button>
+  </div>
+
+  <!-- 学习页 -->
+  <div id="page-learn">
+    <div class="cats" id="cats"></div>
+    <div class="modes">
+      <button class="mode-btn active" data-mode="learn">🎧 听一听</button>
+      <button class="mode-btn" data-mode="test">🎤 说一说</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+    <div class="card" id="card"></div>
+    <div class="feedback" id="fb"></div>
+  </div>
+
+  <!-- 奖励页 -->
+  <div id="page-award" style="display:none;">
+    <div class="cal">
+      <div class="cal-head">
+        <button onclick="changeCal(-1)">◀</button>
+        <h3 id="calTitle"></h3>
+        <button onclick="changeCal(1)">▶</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="sticker-wall">
+      <h3>🎁 收集小星星，解锁贴纸！</h3>
+      <div class="stickers" id="stickers"></div>
+      <p style="text-align:center;color:#999;font-size:11px;margin-top:8px;">每得5颗星解锁1张贴纸</p>
+    </div>
+    <p class="hint">
+      💡 小建议：每天玩10分钟就够啦<br>
+      宝宝答对了一定要夸夸他哦 ❤️
+    </p>
+  </div>
+</div>
+
+<div class="celebrate" id="cel">
+  <div class="celebrate-box">
+    <div class="celebrate-emoji">🎉</div>
+    <h2 id="celTitle">太棒啦！</h2>
+    <p id="celText">你今天练习得很好！</p>
+    <button class="celebrate-btn" onclick="closeCel()">明天继续加油！💪</button>
+  </div>
+</div>
+
+<script>
+// ========== 词库 ==========
+// emoji + 英文 + 中文 + 类型
+const WORDS={
+  colors:{
+    name:'颜色',en:'Colors',icon:'🎨',
+    list:[
+      ['red','红色','🔴'],['blue','蓝色','🔵'],['yellow','黄色','🟡'],
+      ['green','绿色','🟢'],['orange','橙色','🟠'],['purple','紫色','🟣'],
+      ['pink','粉色','🌸'],['black','黑色','⚫'],['white','白色','⚪'],
+      ['brown','棕色','🟤'],
+    ]
+  },
+  animals:{
+    name:'动物',en:'Animals',icon:'🐾',
+    list:[
+      ['cat','猫咪','🐱'],['dog','小狗','🐶'],['bird','小鸟','🐦'],
+      ['fish','小鱼','🐟'],['rabbit','兔子','🐰'],['monkey','猴子','🐵'],
+      ['panda','熊猫','🐼'],['tiger','老虎','🐯'],['lion','狮子','🦁'],
+      ['elephant','大象','🐘'],['duck','鸭子','🦆'],['pig','小猪','🐷'],
+      ['bear','熊熊','🐻'],['frog','青蛙','🐸'],
+    ]
+  },
+  numbers:{
+    name:'数字',en:'Numbers',icon:'🔢',
+    list:[
+      ['one','一','1️⃣'],['two','二','2️⃣'],['three','三','3️⃣'],
+      ['four','四','4️⃣'],['five','五','5️⃣'],['six','六','6️⃣'],
+      ['seven','七','7️⃣'],['eight','八','8️⃣'],['nine','九','9️⃣'],
+      ['ten','十','🔟'],
+    ]
+  }
+};
+
+const STICKERS=['🎈','🎀','🎁','🎪','🎨','🏆','🦋','🌸','🍭','🍦','🎃','🎄','🦄','🐣','🌈','⭐'];
+const CHEER_GOOD=['太棒了！🌟','真厉害！👏','好棒呀！🎉','你真聪明！💯','Perfect! 🌟','Excellent! 🏆','好样的！👍','Super! 🦸'];
+const CHEER_RETRY=['没关系，再试试~ 💪','再听一遍，慢慢说~ 👂','差一点，加油！🔥','声音大一点~ 📣','再说一次试试~ 🎤'];
+
+// ========== 状态 ==========
+const LS={
+  get(k,d){try{return JSON.parse(localStorage.getItem('ek_'+k))??d;}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem('ek_'+k,JSON.stringify(v));}catch(e){}}
+};
+let state=LS.get('s',{
+  stars:0,totalStars:0,history:{},streak:0,lastDate:'',
+  stickersGot:[],todayDone:false
+});
+function save(){LS.set('s',state);}
+function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function updateStreak(){
+  const t=todayStr();
+  if(state.lastDate===t)return;
+  const y=new Date();y.setDate(y.getDate()-1);
+  const ys=`${y.getFullYear()}-${String(y.getMonth()+1).padStart(2,'0')}-${String(y.getDate()).padStart(2,'0')}`;
+  if(state.lastDate===ys)state.streak++;
+  else if(state.lastDate)state.streak=1;
+  else state.streak=1;
+  state.lastDate=t;
+  state.todayDone=false;
+  save();
+}
+updateStreak();
+
+// ========== 练习状态 ==========
+let curCat='colors',curMode='learn',curIdx=0,curList=[];
+let listHistory={}; // 记住每个分类做了几个
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function loadList(cat){
+  if(!listHistory[cat])listHistory[cat]={queue:shuffle(WORDS[cat].list),idx:0};
+  if(listHistory[cat].idx>=listHistory[cat].queue.length){
+    listHistory[cat].queue=shuffle(WORDS[cat].list);listHistory[cat].idx=0;
+  }
+  curList=listHistory[cat].queue;curIdx=listHistory[cat].idx;
+}
+
+// ========== 渲染分类按钮 ==========
+function renderCats(){
+  const el=document.getElementById('cats');
+  el.innerHTML=Object.entries(WORDS).map(([k,v])=>`
+    <div class="cat ${k===curCat?'active':''}" data-cat="${k}">
+      <div class="cat-icon">${v.icon}</div>
+      <div class="cat-name">${v.name}</div>
+      <div class="cat-en">${v.en}</div>
+      <div class="cat-count">${v.list.length}个词</div>
+    </div>
+  `).join('');
+  el.querySelectorAll('.cat').forEach(c=>{
+    c.onclick=()=>{curCat=c.dataset.cat;loadList(curCat);renderCats();render();};
+  });
+}
+
+function render(){
+  loadList(curCat);
+  const w=curList[curIdx];
+  const [en,cn,emoji]=w;
+  const total=WORDS[curCat].list.length;
+  document.getElementById('prog').style.width=(curIdx/total*100)+'%';
+
+  let cardHtml=`
+    <button class="speaker" onclick="speak('${en}')">🔊</button>
+    <div class="card-img">${emoji}</div>
+  `;
+  if(curMode==='learn'){
+    cardHtml+=`<div class="card-word">${en}</div><div class="card-cn">${cn}</div>`;
+  }else{
+    cardHtml+=`<div class="card-word" style="font-size:28px;color:#ff9a56;">What is it?</div><div class="card-cn">${cn}（说英文哦~）</div>`;
+  }
+  cardHtml+=`<div class="btns" style="margin-top:16px;">`;
+  if(curMode==='learn'){
+    cardHtml+=`<button class="big-btn btn-hear" onclick="speak('${en}')">🔊 听发音</button>`;
+  }else{
+    cardHtml+=`<button class="big-btn btn-hear" onclick="speak('${en}')" style="flex:0.4;font-size:16px;">🔊 提示</button>`;
+    cardHtml+=`<button class="big-btn btn-speak" id="recBtn" onclick="toggleRec()">🎤 按这里说</button>`;
+  }
+  cardHtml+=`</div>`;
+  if(curMode==='learn'){
+    cardHtml+=`<div class="btns" style="margin-top:10px;">
+      <button class="big-btn btn-nav" onclick="prevWord()">◀</button>
+      <button class="big-btn" style="background:linear-gradient(135deg,#51cf66,#40c057);color:#fff;flex:2;" onclick="nextWord()">下一个 ▶</button>
+    </div>`;
+  }
+  document.getElementById('card').innerHTML=cardHtml;
+  document.getElementById('fb').style.display='none';
+  // 自动读
+  if(curMode==='learn')setTimeout(()=>speak(en),300);
+}
+
+function speak(text){
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=0.75;u.pitch=1.3;
+  const vs=speechSynthesis.getVoices();
+  const en=vs.find(v=>v.lang.startsWith('en')&&/female|Samantha|Karen|Google/i.test(v.name))||vs.find(v=>v.lang.startsWith('en-US'))||vs.find(v=>v.lang.startsWith('en'));
+  if(en)u.voice=en;
+  speechSynthesis.speak(u);
+}
+speechSynthesis.getVoices();
+speechSynthesis.onvoiceschanged=()=>{};
+
+function prevWord(){listHistory[curCat].idx=Math.max(0,listHistory[curCat].idx-1);render();}
+function nextWord(){
+  listHistory[curCat].idx++;
+  if(listHistory[curCat].idx>=WORDS[curCat].list.length){
+    // 这组学完了
+    showCelebrate();return;
+  }
+  curIdx=listHistory[curCat].idx;render();
+}
+
+// ========== 语音识别（宽容模式，小孩发音不标准也过） ==========
+let rec=null,isRec=false;
+function initRec(){
+  if(rec)return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR)return;
+  rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.maxAlternatives=8;
+  rec.continuous=false;
+  rec.onresult=e=>{
+    clearTimeout(recTimer);
+    const heard=[];
+    for(let i=0;i<e.results[0].length;i++)heard.push(e.results[0][i].transcript.trim().toLowerCase());
+    judge(heard);
+  };
+  rec.onerror=e=>{
+    clearTimeout(recTimer);
+    stopRec();
+    if(e.error==='not-allowed'){alert('请允许使用麦克风哦~');return;}
+    showFb('bad','没听清，大声说一次试试~ 🎤');
+  };
+  rec.onend=()=>{stopRec();};
+}
+let recTimer;
+function toggleRec(){
+  initRec();
+  if(!rec){alert('请用Chrome或Safari打开哦~');return;}
+  if(isRec){try{rec.stop();}catch(e){}stopRec();return;}
+  try{
+    rec.start();isRec=true;
+    const btn=document.getElementById('recBtn');
+    if(btn){btn.classList.add('rec');btn.textContent='🎤 在听啦...';}
+    document.getElementById('fb').style.display='none';
+    // 6秒超时（宝宝反应慢一点）
+    clearTimeout(recTimer);
+    recTimer=setTimeout(()=>{
+      if(isRec){try{rec.stop();}catch(e){}showFb('bad','没听到声音哦，大声一点~ 📣');}
+    },6000);
+  }catch(e){
+    try{rec.stop();}catch(_){}
+    setTimeout(()=>{try{rec.start();}catch(_){}},200);
+  }
+}
+function stopRec(){
+  isRec=false;clearTimeout(recTimer);
+  const btn=document.getElementById('recBtn');
+  if(btn){btn.classList.remove('rec');btn.textContent='🎤 按这里说';}
+}
+
+function judge(heard){
+  const w=curList[curIdx];
+  const target=w[0].toLowerCase();
+  const fb=document.getElementById('fb');
+  let ok=false;
+  // 宽松判断：包含目标词、或只相差1个字符（小孩发音）、或识别结果里有近似词
+  for(const h of heard){
+    if(!h)continue;
+    if(h===target||h.includes(target)||target.includes(h)){ok=true;break;}
+    // 简单模糊匹配：编辑距离<=1就算对（照顾小孩发音）
+    if(levDist(h,target)<=Math.max(1,Math.floor(target.length/3))){ok=true;break;}
+  }
+  stopRec();
+  if(ok){
+    addStar();
+    const cheer=CHEER_GOOD[Math.floor(Math.random()*CHEER_GOOD.length)];
+    showFb('good',`${cheer}<br><span style="font-size:14px;font-weight:400">就是 ${target}！</span>`,w[3]);
+    setTimeout(()=>{nextWordTest();},1600);
+  }else{
+    const retry=CHEER_RETRY[Math.floor(Math.random()*CHEER_RETRY.length)];
+    showFb('bad',`${retry}<br><span style="font-size:14px;font-weight:400">正确是 ${target}</span>`);
+    setTimeout(()=>speak(target),600);
+  }
+}
+// 编辑距离
+function levDist(a,b){
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
+  for(let i=0;i<=m;i++)dp[i][0]=i;
+  for(let j=0;j<=n;j++)dp[0][j]=j;
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++){
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j-1],dp[i-1][j],dp[i][j-1]);
+  }
+  return dp[m][n];
+}
+function nextWordTest(){
+  listHistory[curCat].idx++;
+  if(listHistory[curCat].idx>=WORDS[curCat].list.length){showCelebrate();return;}
+  curIdx=listHistory[curCat].idx;render();
+}
+function showFb(type,html){
+  const fb=document.getElementById('fb');
+  fb.className=`feedback ${type==='good'?'good':'bad'}`;
+  fb.innerHTML=html;
+  fb.style.display='block';
+}
+function addStar(){
+  state.stars++;state.totalStars++;
+  // 每5颗星解锁贴纸
+  const unlockIdx=Math.floor(state.totalStars/5)-1;
+  if(unlockIdx>=0&&unlockIdx<STICKERS.length&&!state.stickersGot.includes(unlockIdx)){
+    state.stickersGot.push(unlockIdx);
+    setTimeout(()=>{
+      fireConfetti();
+      showFb('good',`🎁 解锁新贴纸！${STICKERS[unlockIdx]}`);
+    },1200);
+  }
+  // 今日打卡
+  const t=todayStr();
+  if(!state.history[t])state.history[t]={stars:0};
+  state.history[t].stars++;
+  if(state.totalStars>0&&!state.todayDone){state.todayDone=true;}
+  save();renderTop();renderStickers();
+}
+
+// ========== 庆祝 ==========
+function showCelebrate(){
+  if(!state.todayDone||state.history[todayStr()].stars<5){
+    // 只是这组学完，继续
+    document.getElementById('celTitle').textContent=`🎉 ${WORDS[curCat].name}全学完啦！`;
+    document.getElementById('celText').textContent=`换一组继续玩，或者休息一下~`;
+    fireConfetti();
+  }else{
+    document.getElementById('celTitle').textContent=`🏆 今日任务达成！`;
+    document.getElementById('celText').textContent=`你已经学了5个词啦，明天继续加油！`;
+    fireConfetti();
+  }
+  document.getElementById('cel').classList.add('show');
+}
+function closeCel(){
+  document.getElementById('cel').classList.remove('show');
+  listHistory[curCat].idx=0;listHistory[curCat].queue=shuffle(WORDS[curCat].list);
+  // 切到下一个分类
+  const cats=Object.keys(WORDS);
+  const ni=(cats.indexOf(curCat)+1)%cats.length;
+  curCat=cats[ni];loadList(curCat);renderCats();render();renderTop();
+}
+function fireConfetti(){
+  const colors=['#ff6b6b','#ffa94d','#ffd43b','#51cf66','#339af0','#cc5de8'];
+  for(let i=0;i<40;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.left=Math.random()*100+'vw';
+    c.style.top='-20px';
+    c.style.transform=`rotate(${Math.random()*360}deg)`;
+    document.body.appendChild(c);
+    const dur=2000+Math.random()*2000;
+    const xEnd=(Math.random()-0.5)*200;
+    c.animate([
+      {transform:`translate(0,0) rotate(0)`,opacity:1},
+      {transform:`translate(${xEnd}px,100vh) rotate(${Math.random()*720}deg)`,opacity:0}
+    ],{duration:dur,easing:'cubic-bezier(0.25,0.46,0.45,0.94)'});
+    setTimeout(()=>c.remove(),dur);
+  }
+}
+
+// ========== 顶部/奖励页 ==========
+function renderTop(){
+  document.getElementById('stars').textContent=state.stars;
+  document.getElementById('streak').textContent=state.streak;
+}
+let calMonth=new Date();
+function changeCal(d){calMonth.setMonth(calMonth.getMonth()+d);renderCal();}
+function renderCal(){
+  const y=calMonth.getFullYear(),m=calMonth.getMonth();
+  document.getElementById('calTitle').textContent=`${y}年${m+1}月`;
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+  ['日','一','二','三','四','五','六'].forEach(d=>grid.innerHTML+=`<div class="cal-dow">${d}</div>`);
+  const first=new Date(y,m,1).getDay();
+  const last=new Date(y,m+1,0).getDate();
+  for(let i=0;i<first;i++)grid.innerHTML+=`<div class="cal-day"></div>`;
+  const t=todayStr();
+  for(let d=1;d<=last;d++){
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const done=state.history[ds]&&state.history[ds].stars>=3;
+    grid.innerHTML+=`<div class="cal-day ${ds===t?'today':''} ${done?'done':''}">${d}${done?'<span class="star">⭐</span>':''}</div>`;
+  }
+}
+function renderStickers(){
+  const el=document.getElementById('stickers');
+  el.innerHTML=STICKERS.map((s,i)=>`<span class="sticker ${state.stickersGot.includes(i)?'got':''}" title="${Math.floor((i+1)*5)}颗星解锁">${s}</span>`).join('');
+}
+
+// ========== 切换事件 ==========
+document.querySelectorAll('.mode-btn').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.mode-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    curMode=b.dataset.mode;render();
+  };
+});
+document.querySelectorAll('.nav-tab').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const p=b.dataset.page;
+    document.getElementById('page-learn').style.display=p==='learn'?'block':'none';
+    document.getElementById('page-award').style.display=p==='award'?'block':'none';
+    if(p==='award'){renderCal();renderStickers();}
+  };
+});
+
+// PWA 安装提示
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;});
+
+// ========== 启动 ==========
+loadList(curCat);renderCats();render();renderTop();
+</script>
+</body>
+</html>
