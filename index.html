@@ -6,8 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#ff9a56">
-<title>🌟 小朋友英语乐园</title>
-<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;英语乐园&quot;,&quot;short_name&quot;:&quot;英语&quot;,&quot;start_url&quot;:&quot;./index.html&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23fff5e6&quot;,&quot;theme_color&quot;:&quot;%23ff9a56&quot;}">
+<title>Lucas学英语</title>
+<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;Lucas学英语&quot;,&quot;short_name&quot;:&quot;Lucas英语&quot;,&quot;start_url&quot;:&quot;./index.html&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23fff5e6&quot;,&quot;theme_color&quot;:&quot;%23ff9a56&quot;}">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
 body{font-family:"Comic Sans MS","Chalkboard SE","PingFang SC",sans-serif;background:linear-gradient(135deg,#fff5e6 0%,#ffe0cc 50%,#ffd1b3 100%);min-height:100vh;overflow-x:hidden;}
@@ -18,6 +18,11 @@ body{font-family:"Comic Sans MS","Chalkboard SE","PingFang SC",sans-serif;backgr
 .stars-box{font-weight:700;font-size:20px;color:#ff9a56;}
 .streak-box{font-size:14px;color:#666;}
 .streak-num{color:#ff6b6b;font-weight:700;font-size:18px;}
+.checkin-btn{background:linear-gradient(135deg,#51cf66,#40c057);color:#fff;border:none;border-radius:30px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(81,207,102,0.4);transition:all 0.2s;}
+.checkin-btn:active{transform:scale(0.95);}
+.checkin-btn.done{background:linear-gradient(135deg,#adb5bd,#868e96);box-shadow:none;cursor:default;}
+.checkin-btn.bounce{animation:bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes bounceIn{0%{transform:scale(0.3);}50%{transform:scale(1.15);}100%{transform:scale(1);}}
 
 h1{text-align:center;font-size:26px;margin:8px 0 14px;background:linear-gradient(135deg,#ff6b6b,#ffa500,#ffdd00,#51cf66,#339af0,#cc5de8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900;}
 
@@ -89,7 +94,10 @@ h1{text-align:center;font-size:26px;margin:8px 0 14px;background:linear-gradient
 .cal-dow{text-align:center;font-size:11px;color:#aaa;padding:4px;font-weight:700;}
 .cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:12px;}
 .cal-day.today{background:#fff1e6;color:#ff9a56;font-weight:700;}
-.cal-day.done{background:linear-gradient(135deg,#ff9a56,#ff6b6b);color:#fff;font-weight:700;}
+.cal-day.done{background:linear-gradient(135deg,#51cf66,#37b24d);color:#fff;font-weight:700;position:relative;}
+.cal-day.done::after{content:'✓';position:absolute;font-size:10px;font-weight:900;}
+.cal-day.today-notdone{background:#fff1e6;border:2px dashed #ff9a56;color:#ff9a56;font-weight:700;}
+.cal-day.today-done{background:linear-gradient(135deg,#ff9a56,#ff6b6b);color:#fff;font-weight:700;box-shadow:0 0 0 3px rgba(255,154,86,0.3);}
 .cal-day .star{position:absolute;font-size:10px;}
 
 .nav-tabs{display:flex;gap:8px;margin-bottom:14px;}
@@ -121,9 +129,10 @@ h1{text-align:center;font-size:26px;margin:8px 0 14px;background:linear-gradient
 <div class="app">
   <div class="top">
     <div class="stars-box">⭐ <span id="stars">0</span></div>
+    <button class="checkin-btn" id="checkinBtn" onclick="doCheckin()">📅 今日打卡</button>
     <div class="streak-box">🔥<span class="streak-num" id="streak">0</span>天</div>
   </div>
-  <h1>🌈 Hello! 小朋友英语</h1>
+  <h1>🌈 Lucas学英语</h1>
 
   <div class="nav-tabs">
     <button class="nav-tab active" data-page="learn">📖 学习</button>
@@ -236,13 +245,14 @@ const SENTENCES={
   animals:[
     {
       q:'What animal is this?',
-      a:'This is a/an ___.',
+      a:'This is ___ ___.',
       mode:'speak',
-      hint:'这是什么动物？'
+      hint:'这是什么动物？',
+      prependAAn:true
     },
     {
       q:'Where does a ___ live?',
-      a:'A/An ___ lives on the farm.',
+      a:'A/An ___ lives __place__.',
       mode:'choose',
       hint:'它住在哪里？',
       places:[
@@ -321,19 +331,33 @@ const LS={
   set(k,v){try{localStorage.setItem('ek_'+k,JSON.stringify(v));}catch(e){}}
 };
 let state=LS.get('s',{
-  stars:0,totalStars:0,history:{},streak:0,lastDate:'',
+  stars:0,totalStars:0,history:{},streak:0,checkins:{},
   stickersGot:[],todayDone:false
 });
 function save(){LS.set('s',state);}
 function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-function updateStreak(){
-  const t=todayStr();
-  if(state.lastDate===t)return;
-  const y=new Date();y.setDate(y.getDate()-1);
-  const ys=`${y.getFullYear()}-${String(y.getMonth()+1).padStart(2,'0')}-${String(y.getDate()).padStart(2,'0')}`;
-  state.streak=state.lastDate===ys?state.streak+1:state.lastDate?1:1;
-  state.lastDate=t;state.todayDone=false;save();
+function dateStr(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function isCheckedIn(dateStr){return !!state.checkins[dateStr];}
+function isTodayCheckedIn(){return isCheckedIn(todayStr());}
+// 基于checkins重新计算连续天数（从今天往前数）
+function calcStreak(){
+  if(!state.checkins||Object.keys(state.checkins).length===0)return 0;
+  let count=0;
+  const d=new Date();
+  // 如果今天没打卡，从昨天开始数
+  if(!isTodayCheckedIn())d.setDate(d.getDate()-1);
+  while(true){
+    const ds=dateStr(d);
+    if(state.checkins[ds]){
+      count++;
+      d.setDate(d.getDate()-1);
+    }else{
+      break;
+    }
+  }
+  return count;
 }
+function updateStreak(){state.streak=calcStreak();save();}
 updateStreak();
 
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
@@ -376,19 +400,35 @@ function genSentence(){
   const word=curWord();
   const [w_en,w_cn,w_emoji]=word;
   let q=sent.q,a=sent.a,options=null,showAnswer=false,place=null;
+  const art=aOrAn(w_en);
 
-  // 替换___为单词
-  q=q.replace('___',`<span style="color:#ff6b6b;font-weight:800">_____</span>`);
+  // 问句显示：把 ___ 替换为空白横线
+  if(sent.prependAAn){
+    // "This is ___ ___." → "This is _____."
+    q=q.replace('___ ___','<span style="color:#ff6b6b;font-weight:800">_____</span>');
+  }else{
+    q=q.replace('___',`<span style="color:#ff6b6b;font-weight:800">_____</span>`);
+  }
 
   if(sent.mode==='choose'){
     if(sent.yesNo){
       // Can ___ fly? 类 - 选Yes/No
       options=[{text:'Yes ✅',val:'yes'},{text:'No ❌',val:'no'}];
+      a=a.replace('___',`<b>${w_en}</b>`);
     }else if(sent.places){
       // 住在哪里
       place=pick(sent.places);
       const others=pickN(sent.places.filter(p=>p[0]!==place[0]),3);
       options=shuffle([place,...others]).map(p=>({text:p[1]+' '+p[0],val:p[0],emoji:p[1]}));
+      // A/An + 单词 + 地点
+      const artCap=art.charAt(0).toUpperCase()+art.slice(1);
+      a=a.replace('A/An',artCap).replace('___',`<b>${w_en}</b>`).replace('__place__',`<b>${place[0]}</b>`);
+    }
+  }else{
+    // 非选择题：在答案里替换
+    if(sent.prependAAn){
+      a=a.replace('___ ___',`<b>${art} ${w_en}</b>`);
+    }else{
       a=a.replace('___',`<b>${w_en}</b>`);
     }
   }
@@ -463,8 +503,11 @@ function renderSentence(card){
 
   if(s.mode==='speak'||s.mode==='act'){
     // 跟读/表演模式
-    const qFull=s.qRaw.replace('___',w_en);
-    const aFull=s.aRaw.replace(/___/g,w_en);
+    const aFull=fillSentenceRaw(s.aRaw,w_en);
+    // 构造朗读用的完整问句
+    let qSpeak=s.qRaw;
+    if(s.prependAAn){qSpeak=s.qRaw.replace('___ ___',`${aOrAn(w_en)} ${w_en}`);}
+    else{qSpeak=s.qRaw.replace('___',w_en);}
     html+=`<button class="speaker" onclick="speakSentence()">🔊</button>
       <div class="sentence-step">
         <div class="q-icon">${s.mode==='act'?'🎭':w_emoji}</div>
@@ -479,10 +522,16 @@ function renderSentence(card){
           </div>
         </div>
       </div>`;
-    setTimeout(()=>speak(s.qRaw.replace('___',w_en),{rate:0.7}),300);
+    setTimeout(()=>speak(qSpeak,{rate:0.7}),300);
   }else if(s.mode==='choose'){
     // 选择题
-    html+=`<button class="speaker" onclick="speak(s.qRaw.replace('___','${w_en}'))">🔊</button>
+    let qSpeak=s.qRaw;
+    if(qSpeak.includes('A/An')){
+      qSpeak=qSpeak.replace('A/An',aOrAn(w_en)).replace('___',w_en);
+    }else{
+      qSpeak=qSpeak.replace('___',w_en);
+    }
+    html+=`<button class="speaker" onclick="speak('${qSpeak.replace(/'/g,"\\'")}')">🔊</button>
       <div class="sentence-step">
         <div class="q-icon">${w_emoji}</div>
         <div class="q-text">${s.displayQ}</div>
@@ -493,7 +542,7 @@ function renderSentence(card){
           <button class="big-btn btn-next" onclick="nextWord()" style="margin-top:10px;">下一题 ▶</button>
         </div>
       </div>`;
-    setTimeout(()=>speak(s.qRaw.replace('___',w_en),{rate:0.7}),300);
+    setTimeout(()=>speak(qSpeak,{rate:0.7}),300);
   }
   card.innerHTML=html;
 
@@ -511,16 +560,39 @@ function renderSentence(card){
   }
 }
 
+function fillSentenceRaw(tpl,w_en,place){
+  const art=aOrAn(w_en);
+  let s=tpl;
+  if(s.includes('___ ___')){
+    s=s.replace('___ ___',`${art} ${w_en}`);
+  }else if(s.includes('A/An')){
+    const artCap=art.charAt(0).toUpperCase()+art.slice(1);
+    s=s.replace('A/An',artCap).replace('___',w_en);
+    if(place)s=s.replace('__place__',place);
+  }else{
+    s=s.replace(/___/g,w_en);
+  }
+  return s;
+}
 function speakSentence(){
   const s=curSentence;if(!s)return;
   const [w_en]=s.word;
-  speak(s.qRaw.replace('___',w_en),{rate:0.65});
-  setTimeout(()=>speak(s.aRaw.replace(/___/g,w_en),{rate:0.65}),1800);
+  // 朗读问句
+  let qSpeak=s.qRaw;
+  if(s.prependAAn){
+    const art=aOrAn(w_en);
+    qSpeak=s.qRaw.replace('___ ___',`${art} ${w_en}`);
+  }else{
+    qSpeak=s.qRaw.replace('___',w_en);
+  }
+  speak(qSpeak,{rate:0.65});
+  // 朗读答案
+  setTimeout(()=>speak(fillSentenceRaw(s.aRaw,w_en,s.place?s.place[0]:null),{rate:0.65}),1800);
 }
 function showAnswerSpeak(){
   document.getElementById('answerArea').classList.remove('hidden');
   const s=curSentence;const [w_en]=s.word;
-  setTimeout(()=>speak(s.aRaw.replace(/___/g,w_en),{rate:0.65}),300);
+  setTimeout(()=>speak(fillSentenceRaw(s.aRaw,w_en,s.place?s.place[0]:null),{rate:0.65}),300);
 }
 
 function checkChoose(val,btn){
@@ -562,7 +634,7 @@ function checkChoose(val,btn){
     const flyers=['bird','eagle','owl','crow','duck'];
     answerText=flyers.includes(w_en)?`Yes, ${w_en} can fly! ✅`:`No, ${w_en} can't fly. ❌`;
   }else{
-    answerText=`A ${w_en} lives ${s.place[0]}. ${s.place[1]}`;
+    answerText=`${aOrAn(w_en).charAt(0).toUpperCase()+aOrAn(w_en).slice(1)} ${w_en} lives ${s.place[0]}. ${s.place[1]}`;
   }
   aText.innerHTML=answerText;
   setTimeout(()=>speak(answerText,{rate:0.7}),500);
@@ -682,6 +754,25 @@ function levDist(a,b){
   return dp[m][n];
 }
 
+function doCheckin(){
+  const t=todayStr();
+  if(state.checkins[t])return; // 已打卡
+  state.checkins[t]=true;
+  updateStreak();
+  state.todayDone=true;
+  save();
+  renderTop();
+  fireConfetti();
+  // 里程碑庆祝
+  if(state.streak===7||state.streak===14||state.streak===30||state.streak===50||state.streak===100){
+    document.getElementById('celTitle').textContent=`🎊 连续打卡${state.streak}天！`;
+    document.getElementById('celText').textContent='坚持就是胜利，你太厉害啦！';
+    document.getElementById('cel').classList.add('show');
+  }else{
+    showFb('good',`<span class="emoji">🎉</span>打卡成功！连续${state.streak}天啦！`);
+  }
+}
+
 function addStar(){
   state.stars++;state.totalStars++;
   const unlockIdx=Math.floor(state.totalStars/5)-1;
@@ -725,6 +816,17 @@ function fireConfetti(){
 function renderTop(){
   document.getElementById('stars').textContent=state.stars;
   document.getElementById('streak').textContent=state.streak;
+  const btn=document.getElementById('checkinBtn');
+  if(!btn)return;
+  if(isTodayCheckedIn()){
+    btn.className='checkin-btn done';
+    btn.textContent='✅ 已打卡';
+    btn.disabled=true;
+  }else{
+    btn.className='checkin-btn';
+    btn.textContent='📅 今日打卡';
+    btn.disabled=false;
+  }
 }
 
 let calMonth=new Date();
@@ -739,8 +841,14 @@ function renderCal(){
   const t=todayStr();
   for(let d=1;d<=last;d++){
     const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const done=state.history[ds]&&state.history[ds].stars>=3;
-    grid.innerHTML+=`<div class="cal-day ${ds===t?'today':''} ${done?'done':''}">${d}${done?'<span class="star" style="position:static">⭐</span>':''}</div>`;
+    const checked=!!state.checkins[ds];
+    const isToday=ds===t;
+    let cls='';
+    if(isToday&&checked)cls='today-done';
+    else if(isToday&&!checked)cls='today-notdone';
+    else if(checked)cls='done';
+    // 打卡日显示绿色✓，未打卡的今天显示橙色虚线
+    grid.innerHTML+=`<div class="cal-day ${cls}">${d}</div>`;
   }
 }
 
