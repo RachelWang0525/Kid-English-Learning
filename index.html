@@ -498,7 +498,7 @@ function genSentence(){
 function speak(text,opts={}){
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
-  u.lang=opts.lang||'en-US';u.rate=opts.rate||0.75;u.pitch=opts.pitch||1.3;
+  u.lang=opts.lang||'en-US';u.rate=opts.rate||0.6;u.pitch=opts.pitch||1.2;
   const vs=speechSynthesis.getVoices();
   if(!opts.lang||opts.lang.startsWith('en')){
     const en=vs.find(v=>v.lang.startsWith('en')&&/female|Samantha|Karen|Google/i.test(v.name))||vs.find(v=>v.lang.startsWith('en-US'))||vs.find(v=>v.lang.startsWith('en'));
@@ -561,7 +561,7 @@ function renderSentence(card){
     const ce=s.countEmojis;
     const emojis=ce.emoji.repeat(ce.n);
     const answerEn=`There are ${w_en}.`;
-    html+=`<button class="speaker" onclick="speak('${answerEn.replace(/'/g,"\\'")}',{rate:0.7})">🔊</button>
+    html+=`<button class="speaker" onclick="speak('${answerEn.replace(/'/g,"\\'")}',{rate:0.55})">🔊</button>
       <div class="sentence-step">
         <div style="font-size:42px;letter-spacing:4px;margin:14px 0;line-height:1.3;text-align:center;word-break:break-all;">${emojis}</div>
         <div class="q-text">How many?</div>
@@ -574,7 +574,7 @@ function renderSentence(card){
           </div>
         </div>
       </div>`;
-    setTimeout(()=>speak('How many?',{rate:0.7}),300);
+    setTimeout(()=>speak('How many?',{rate:0.55}),300);
     card.innerHTML=html;return;
   }
 
@@ -599,7 +599,7 @@ function renderSentence(card){
           </div>
         </div>
       </div>`;
-    setTimeout(()=>speak(qSpeak,{rate:0.7}),300);
+    setTimeout(()=>speak(qSpeak,{rate:0.55}),300);
   }else if(s.mode==='choose'){
     // 选择题
     let qSpeak=s.qRaw;
@@ -619,7 +619,7 @@ function renderSentence(card){
           <button class="big-btn btn-next" onclick="nextWord()" style="margin-top:10px;">下一题 ▶</button>
         </div>
       </div>`;
-    setTimeout(()=>speak(qSpeak,{rate:0.7}),300);
+    setTimeout(()=>speak(qSpeak,{rate:0.55}),300);
   }else{
     // 兜底：未知模式按speak跟读处理
     const aFull=fillSentenceRaw(s.aRaw,w_en);
@@ -639,7 +639,7 @@ function renderSentence(card){
           </div>
         </div>
       </div>`;
-    setTimeout(()=>speak(qSpeak,{rate:0.7}),300);
+    setTimeout(()=>speak(qSpeak,{rate:0.55}),300);
   }
   card.innerHTML=html;
 
@@ -661,7 +661,7 @@ function renderSentence(card){
 function showCountAnswer(){
   document.getElementById('countAnswerArea').classList.remove('hidden');
   const s=curSentence;const [w_en]=s.word;
-  setTimeout(()=>speak(`There are ${w_en}`,{rate:0.7}),300);
+  setTimeout(()=>speak(`There are ${w_en}`,{rate:0.55}),300);
 }
 
 function fillSentenceRaw(tpl,w_en,place){
@@ -689,14 +689,14 @@ function speakSentence(){
   }else{
     qSpeak=s.qRaw.replace('___',w_en);
   }
-  speak(qSpeak,{rate:0.65});
+  speak(qSpeak,{rate:0.55});
   // 朗读答案
-  setTimeout(()=>speak(fillSentenceRaw(s.aRaw,w_en,s.place?s.place[0]:null),{rate:0.65}),1800);
+  setTimeout(()=>speak(fillSentenceRaw(s.aRaw,w_en,s.place?s.place[0]:null),{rate:0.55}),1800);
 }
 function showAnswerSpeak(){
   document.getElementById('answerArea').classList.remove('hidden');
   const s=curSentence;const [w_en]=s.word;
-  setTimeout(()=>speak(fillSentenceRaw(s.aRaw,w_en,s.place?s.place[0]:null),{rate:0.65}),300);
+  setTimeout(()=>speak(fillSentenceRaw(s.aRaw,w_en,s.place?s.place[0]:null),{rate:0.55}),300);
 }
 
 function checkChoose(val,btn){
@@ -741,7 +741,7 @@ function checkChoose(val,btn){
     answerText=`${aOrAn(w_en).charAt(0).toUpperCase()+aOrAn(w_en).slice(1)} ${w_en} lives ${s.place[0]}. ${s.place[1]}`;
   }
   aText.innerHTML=answerText;
-  setTimeout(()=>speak(answerText,{rate:0.7}),500);
+  setTimeout(()=>speak(answerText,{rate:0.55}),500);
 }
 function flyers(w){return ['bird','eagle','owl','crow','duck'].includes(w);}
 
@@ -843,7 +843,7 @@ function judgeSentence(heard){
   }else{
     showFb('bad',`<span class="emoji">🎯</span>${pick(CHEER_RETRY)}<br><span style="font-size:14px">听到的好像不是哦</span>`);
     const full=s.aRaw.replace(/___/g,target);
-    setTimeout(()=>speak(full,{rate:0.7}),500);
+    setTimeout(()=>speak(full,{rate:0.55}),500);
   }
 }
 
@@ -1089,7 +1089,7 @@ function flipMemCard(i){
       gs.matched++;
       document.getElementById('memScore').textContent=gs.matched;
       addStar();
-      speak(ca.word[0],{rate:0.8});
+      speak(ca.word[0],{rate:0.6});
       setTimeout(()=>{
         gs.flipped=[];gs.locked=false;
         if(gs.matched===gs.total){
@@ -1143,7 +1143,7 @@ function startWhackGame(){
 }
 function speakWhackTarget(){
   if(!gameState||!gameState.target)return;
-  speak(gameState.target[0],{rate:0.75});
+  speak(gameState.target[0],{rate:0.6});
 }
 function nextWhackRound(){
   const gs=gameState;if(!gs)return;
@@ -1189,7 +1189,7 @@ function nextWhackRound(){
       },idx*200);
     });
     // 先播放发音
-    setTimeout(()=>speak(target[0],{rate:0.75}),600);
+    setTimeout(()=>speak(target[0],{rate:0.6}),600);
   },300);
   // 时间到（2秒后地鼠下去）
   gameTimer=setTimeout(()=>{
@@ -1215,7 +1215,7 @@ function whackMole(i){
     gs.score++;
     document.getElementById('whackScore').textContent=gs.score;
     addStar();
-    speak(mole.word[0],{rate:0.8});
+    speak(mole.word[0],{rate:0.6});
   }else{
     mEl.classList.add('bomb-hit');
   }
