@@ -24,9 +24,10 @@ body{font-family:"Comic Sans MS","Chalkboard SE","PingFang SC",sans-serif;backgr
 .checkin-btn.bounce{animation:bounceIn 0.6s cubic-bezier(0.34,1.56,0.64,1);}
 @keyframes bounceIn{0%{transform:scale(0.3);}50%{transform:scale(1.15);}100%{transform:scale(1);}}
 
-h1{text-align:center;font-size:26px;margin:8px 0 14px;background:linear-gradient(135deg,#ff6b6b,#ffa500,#ffdd00,#51cf66,#339af0,#cc5de8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900;}
+h1{text-align:center;font-size:26px;margin:8px 0 14px;font-weight:900;}
+h1 .grad{background:linear-gradient(90deg,#ff6b6b,#ff922b,#fcc419,#51cf66,#228be6,#9c36b5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 
-.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.cats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
 .cat{background:#fff;border-radius:20px;padding:12px 6px;text-align:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.08);transition:all 0.2s;border:3px solid transparent;}
 .cat:active{transform:scale(0.95);}
 .cat.active{border-color:#ff9a56;transform:scale(1.02);box-shadow:0 6px 16px rgba(255,154,86,0.4);}
@@ -164,16 +165,28 @@ h1{text-align:center;font-size:26px;margin:8px 0 14px;background:linear-gradient
 .whack-target-emoji{font-size:44px;}
 .whack-target-word{font-size:26px;font-weight:800;font-family:"Comic Sans MS",cursive;color:#333;}
 .whack-speaker{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#ffe0cc,#ffccb3);border:none;font-size:22px;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,0.1);}
+
+/* ===== 统计卡片 ===== */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.stat-item{background:#fff;border-radius:16px;padding:12px 6px;text-align:center;box-shadow:0 3px 10px rgba(0,0,0,0.06);}
+.stat-num{font-size:22px;font-weight:800;background:linear-gradient(135deg,#ff9a56,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-label{font-size:11px;color:#999;margin-top:4px;font-weight:600;}
+.data-mgr{margin-top:14px;}
+.data-btns{display:flex;gap:10px;justify-content:center;margin-top:8px;}
+.data-btn{background:#fff;border:2px solid #ffd3b6;border-radius:20px;padding:10px 18px;font-size:13px;font-weight:700;font-family:inherit;color:#ff9a56;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.05);}
+.data-btn:active{transform:scale(0.96);background:#fff5e6;}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="top">
-    <div class="stars-box">⭐ <span id="stars">0</span></div>
+    <div class="stars-box" title="今日/累计星星">
+      ⭐<span id="stars">0</span> <span style="color:#aaa;font-size:14px;font-weight:400">/</span> <span style="font-size:14px;color:#ffa94d">🏆<span id="totalStars">0</span></span>
+    </div>
     <button class="checkin-btn" id="checkinBtn" onclick="doCheckin()">📅 今日打卡</button>
-    <div class="streak-box" style="cursor:pointer" onclick="goToAward()" title="查看日历">🔥<span class="streak-num" id="streak">0</span>天</div>
+    <div class="streak-box" style="cursor:pointer" onclick="goToAward()" title="连续打卡天数">🔥<span class="streak-num" id="streak">0</span>天</div>
   </div>
-  <h1>🌈 Lucas学英语</h1>
+  <h1>🌈 <span class="grad">Lucas学英语</span></h1>
 
   <div class="nav-tabs">
     <button class="nav-tab active" data-page="learn">📖 学习</button>
@@ -211,6 +224,24 @@ h1{text-align:center;font-size:26px;margin:8px 0 14px;background:linear-gradient
   </div>
 
   <div id="page-award" style="display:none;">
+    <div class="stats-row" id="statsRow">
+      <div class="stat-item">
+        <div class="stat-num" id="statTodayMin">0</div>
+        <div class="stat-label">今日学习(分钟)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="statTodayGames">0</div>
+        <div class="stat-label">今日游戏</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="statWeekMin">0</div>
+        <div class="stat-label">本周学习(分钟)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" id="statTotalGames">0</div>
+        <div class="stat-label">累计游戏</div>
+      </div>
+    </div>
     <div class="cal">
       <div class="cal-head">
         <button onclick="changeCal(-1)">◀</button>
@@ -224,7 +255,15 @@ h1{text-align:center;font-size:26px;margin:8px 0 14px;background:linear-gradient
       <div class="stickers" id="stickers"></div>
       <p style="text-align:center;color:#999;font-size:11px;margin-top:8px;">每5颗星解锁1张贴纸</p>
     </div>
-    <p class="hint">💡 建议每天玩10分钟<br>宝宝答对了要抱抱夸夸他 ❤️</p>
+    <div class="data-mgr">
+      <p class="hint">💡 建议每天玩10分钟<br>宝宝答对了要抱抱夸夸他 ❤️</p>
+      <div class="data-btns">
+        <button class="data-btn" onclick="exportData()">💾 备份数据</button>
+        <button class="data-btn" onclick="document.getElementById('importFile').click()">📂 恢复数据</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+      <p style="text-align:center;color:#bbb;font-size:10px;margin-top:6px;">更新网页前先备份，更新后恢复，进度不丢失</p>
+    </div>
   </div>
 </div>
 
@@ -379,10 +418,54 @@ const LS={
 };
 let state=LS.get('s',{
   stars:0,totalStars:0,history:{},streak:0,checkins:{},
-  stickersGot:[],todayDone:false
+  stickersGot:[],todayDone:false,totalGames:0
 });
 function save(){LS.set('s',state);}
 function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+// 确保当天的history条目存在
+function ensureToday(){
+  const t=todayStr();
+  if(!state.history[t])state.history[t]={stars:0,minutes:0,games:0};
+  if(state.history[t].minutes==null)state.history[t].minutes=0;
+  if(state.history[t].games==null)state.history[t].games=0;
+  return t;
+}
+// 学习时长计时
+let studyTimer=null,studyStart=null;
+function startStudyTimer(){
+  stopStudyTimer();
+  studyStart=Date.now();
+  studyTimer=setInterval(()=>{
+    if(document.hidden)return; // 后台不计时
+    const t=ensureToday();
+    const elapsed=Math.floor((Date.now()-studyStart)/60000); // 每满1分钟
+    if(elapsed>state.history[t].minutes){
+      state.history[t].minutes=elapsed;
+      save();
+    }
+  },15000); // 每15秒检查一次
+}
+function stopStudyTimer(){
+  if(studyTimer){clearInterval(studyTimer);studyTimer=null;}
+  if(studyStart){
+    const t=ensureToday();
+    const addMin=Math.floor((Date.now()-studyStart)/60000);
+    if(addMin>0){state.history[t].minutes=Math.max(state.history[t].minutes,addMin);save();}
+    studyStart=null;
+  }
+}
+// 记录游戏次数
+function recordGamePlay(){
+  const t=ensureToday();
+  state.history[t].games++;
+  state.totalGames++;
+  save();
+}
+// 页面可见性变化时控制计时
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){stopStudyTimer();}
+  else{startStudyTimer();}
+});
 function dateStr(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function isCheckedIn(dateStr){return !!state.checkins[dateStr];}
 function isTodayCheckedIn(){return isCheckedIn(todayStr());}
@@ -507,6 +590,72 @@ function speak(text,opts={}){
   speechSynthesis.speak(u);
 }
 speechSynthesis.getVoices();
+
+// ========== 音效（Web Audio合成，无需文件） ==========
+let audioCtx=null;
+function getAudio(){
+  if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}}
+  return audioCtx;
+}
+function playTone(freq,dur,type='sine',vol=0.3,delay=0){
+  const ctx=getAudio();if(!ctx)return;
+  const t=ctx.currentTime+delay;
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.type=type;osc.frequency.value=freq;
+  gain.gain.setValueAtTime(vol,t);
+  gain.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.start(t);osc.stop(t+dur);
+}
+const SFX={
+  // 正确：清脆上升两音（叮~咚）
+  good(){
+    playTone(660,0.12,'sine',0.25,0);
+    playTone(880,0.2,'sine',0.25,0.1);
+  },
+  // 错误：低沉嗡嗡声
+  bad(){
+    playTone(200,0.25,'sawtooth',0.15,0);
+    playTone(160,0.3,'sawtooth',0.12,0.1);
+  },
+  // 配对翻牌：短促滴答
+  flip(){
+    playTone(520,0.06,'sine',0.15,0);
+  },
+  // 配对成功：欢快三连音（叮咚叮）
+  match(){
+    playTone(523,0.1,'sine',0.25,0);
+    playTone(659,0.1,'sine',0.25,0.08);
+    playTone(784,0.18,'sine',0.25,0.16);
+  },
+  // 打地鼠击中：咚！
+  hit(){
+    playTone(880,0.08,'square',0.2,0);
+    playTone(1320,0.15,'sine',0.2,0.05);
+  },
+  // 打错：嗡
+  miss(){
+    playTone(220,0.2,'sawtooth',0.15,0);
+  },
+  // 通关/打卡：上升琶音
+  win(){
+    const notes=[523,659,784,1047];
+    notes.forEach((f,i)=>playTone(f,0.18,'sine',0.22,i*0.12));
+    playTone(1319,0.35,'sine',0.25,0.48);
+  },
+  // 星星获得：闪光音
+  star(){
+    playTone(800,0.08,'sine',0.15,0);
+    playTone(1200,0.12,'sine',0.15,0.06);
+  },
+  // 打卡成功：清脆叮
+  checkin(){
+    playTone(660,0.1,'sine',0.2,0);
+    playTone(880,0.1,'sine',0.2,0.08);
+    playTone(1100,0.25,'sine',0.2,0.16);
+  }
+};
 
 // ========== 渲染卡片 ==========
 function render(){
@@ -727,6 +876,7 @@ function checkChoose(val,btn){
     fb.innerHTML=`<span class="emoji">🌟</span>${pick(CHEER_GOOD)}`;
     aText.style.color='#2f9e44';
   }else{
+    SFX.bad();
     fb.className='feedback bad';fb.style.display='block';
     fb.innerHTML=`<span class="emoji">🤔</span>${pick(CHEER_RETRY)}`;
     aText.style.color='#c92a2a';
@@ -762,26 +912,48 @@ function shuffleWord(){
 }
 
 // ========== 语音识别 ==========
-let rec=null,isRec=false,recTimer,isSentenceRec=false;
+let rec=null,isRec=false,recTimer,isSentenceRec=false,recCountdown=null;
 function initRec(){
   if(rec)return;
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR)return;
   rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.maxAlternatives=8;rec.continuous=false;
   rec.onresult=e=>{
-    clearTimeout(recTimer);
+    clearTimeout(recTimer);clearInterval(recCountdown);
     const heard=[];
     for(let i=0;i<e.results[0].length;i++)heard.push(e.results[0][i].transcript.trim().toLowerCase().replace(/[.,!?]/g,''));
     if(isSentenceRec)judgeSentence(heard);else judge(heard);
   };
-  rec.onerror=e=>{clearTimeout(recTimer);stopRec();if(e.error==='not-allowed'){alert('请允许使用麦克风哦~');return;}showFb('bad','没听清，大声说一次~ 🎤');};
+  rec.onerror=e=>{clearTimeout(recTimer);clearInterval(recCountdown);stopRec();if(e.error==='not-allowed'){alert('请允许使用麦克风哦~');return;}showFb('bad','没听清，大声说一次~ 🎤');};
   rec.onend=()=>stopRec();
 }
 function startRecTimer(){
-  clearTimeout(recTimer);
+  clearTimeout(recTimer);clearInterval(recCountdown);
+  let sec=10;
+  const btns=document.querySelectorAll('.btn-speak');
+  btns.forEach(b=>{b.dataset.oldText=b.textContent;b.textContent=`🎤 ${sec}s`;});
+  recCountdown=setInterval(()=>{
+    sec--;
+    if(!isRec)return;
+    btns.forEach(b=>{b.textContent=`🎤 ${sec}s`;});
+    if(sec<=3)btns.forEach(b=>{b.style.background='linear-gradient(135deg,#ff6b6b,#fa5252)';});
+    if(sec<=0){clearInterval(recCountdown);}
+  },1000);
   recTimer=setTimeout(()=>{
-    if(isRec){try{rec.stop();}catch(e){}showFb('bad','没听到哦，再大声一点~ 📣');}
-  },6000);
+    clearInterval(recCountdown);
+    if(isRec){
+      try{rec.stop();}catch(e){}
+      showFb('bad','⏰ 时间到啦，再试一次吧~');
+    }
+  },10000);
+}
+function resetRecBtn(){
+  const btns=document.querySelectorAll('.btn-speak');
+  btns.forEach(b=>{
+    b.style.background='';
+    if(b.dataset.oldText)b.textContent=b.dataset.oldText;
+    else b.textContent='🎤 按这里说';
+  });
 }
 function toggleRec(){isSentenceRec=false;startRecGeneric();}
 function toggleRecSentence(){isSentenceRec=true;startRecGeneric();}
@@ -797,8 +969,12 @@ function startRecGeneric(){
   }catch(e){try{rec.stop();}catch(_){}setTimeout(()=>{try{rec.start();startRecTimer();}catch(_){}},200);}
 }
 function stopRec(){
-  isRec=false;clearTimeout(recTimer);
-  document.querySelectorAll('.btn-speak').forEach(b=>{b.classList.remove('rec');b.textContent='🎤 按这里说';});
+  isRec=false;clearTimeout(recTimer);clearInterval(recCountdown);
+  document.querySelectorAll('.btn-speak').forEach(b=>{
+    b.classList.remove('rec');
+    b.style.background='';
+    if(b.dataset.oldText){b.textContent=b.dataset.oldText;}else{b.textContent='🎤 按这里说';}
+  });
 }
 function showFb(type,html){
   const fb=document.getElementById('fb');
@@ -819,6 +995,7 @@ function judge(heard){
     showFb('good',`<span class="emoji">🌟</span>${pick(CHEER_GOOD)}<br><span style="font-size:14px;font-weight:400">就是 ${target}！</span>`);
     setTimeout(()=>nextWord(),1600);
   }else{
+    SFX.bad();
     showFb('bad',`<span class="emoji">🤔</span>${pick(CHEER_RETRY)}<br><span style="font-size:14px;font-weight:400">正确是 ${target}</span>`);
     setTimeout(()=>speak(target),600);
   }
@@ -841,6 +1018,7 @@ function judgeSentence(heard){
     showFb('good',`<span class="emoji">🌟</span>${pick(CHEER_GOOD)}<br><span style="font-size:14px">说得真好！</span>`);
     setTimeout(()=>nextWord(),1800);
   }else{
+    SFX.bad();
     showFb('bad',`<span class="emoji">🎯</span>${pick(CHEER_RETRY)}<br><span style="font-size:14px">听到的好像不是哦</span>`);
     const full=s.aRaw.replace(/___/g,target);
     setTimeout(()=>speak(full,{rate:0.55}),500);
@@ -863,7 +1041,7 @@ function goToAward(){
   document.querySelector('.nav-tab[data-page="award"]').classList.add('active');
   document.getElementById('page-learn').style.display='none';
   document.getElementById('page-award').style.display='block';
-  renderCal();renderStickers();
+  renderCal();renderStickers();renderStats();
 }
 function doCheckin(){
   const t=todayStr();
@@ -873,9 +1051,10 @@ function doCheckin(){
   state.todayDone=true;
   save();
   renderTop();
-  fireConfetti();
+  fireConfetti();SFX.checkin();
   // 里程碑庆祝
   if(state.streak===7||state.streak===14||state.streak===30||state.streak===50||state.streak===100){
+    setTimeout(()=>SFX.win(),200);
     document.getElementById('celTitle').textContent=`🎊 连续打卡${state.streak}天！`;
     document.getElementById('celText').textContent='坚持就是胜利，你太厉害啦！';
     document.getElementById('cel').classList.add('show');
@@ -886,12 +1065,13 @@ function doCheckin(){
 
 function addStar(){
   state.stars++;state.totalStars++;
+  SFX.star();
   const unlockIdx=Math.floor(state.totalStars/5)-1;
   if(unlockIdx>=0&&unlockIdx<STICKERS.length&&!state.stickersGot.includes(unlockIdx)){
     state.stickersGot.push(unlockIdx);
-    setTimeout(()=>{fireConfetti();showFb('good',`<span class="emoji">🎁</span>解锁新贴纸！${STICKERS[unlockIdx]}`);},1200);
+    setTimeout(()=>{fireConfetti();SFX.win();showFb('good',`<span class="emoji">🎁</span>解锁新贴纸！${STICKERS[unlockIdx]}`);},1200);
   }
-  const t=todayStr();if(!state.history[t])state.history[t]={stars:0};state.history[t].stars++;
+  const t=ensureToday();state.history[t].stars++;
   if(state.history[t].stars>=3)state.todayDone=true;
   save();renderTop();renderStickers();
 }
@@ -925,7 +1105,10 @@ function fireConfetti(){
 }
 
 function renderTop(){
-  document.getElementById('stars').textContent=state.stars;
+  const t=todayStr();
+  const todayStars=(state.history[t]&&state.history[t].stars)||0;
+  document.getElementById('stars').textContent=todayStars;
+  document.getElementById('totalStars').textContent=state.totalStars;
   document.getElementById('streak').textContent=state.streak;
   const btn=document.getElementById('checkinBtn');
   if(!btn)return;
@@ -963,6 +1146,21 @@ function renderCal(){
   }
 }
 
+function renderStats(){
+  const t=todayStr();
+  const today=state.history[t]||{minutes:0,games:0};
+  // 本周学习时长：最近7天
+  let weekMin=0;
+  for(let i=0;i<7;i++){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=dateStr(d);
+    if(state.history[ds]&&state.history[ds].minutes)weekMin+=state.history[ds].minutes;
+  }
+  document.getElementById('statTodayMin').textContent=today.minutes||0;
+  document.getElementById('statTodayGames').textContent=today.games||0;
+  document.getElementById('statWeekMin').textContent=weekMin;
+  document.getElementById('statTotalGames').textContent=state.totalGames||0;
+}
 function renderStickers(){
   document.getElementById('stickers').innerHTML=STICKERS.map((s,i)=>`<span class="sticker ${state.stickersGot.includes(i)?'got':''}" title="${(i+1)*5}颗星解锁">${s}</span>`).join('');
 }
@@ -980,7 +1178,7 @@ document.querySelectorAll('.nav-tab').forEach(b=>{
     document.getElementById('page-learn').style.display=p==='learn'?'block':'none';
     document.getElementById('page-games').style.display=p==='games'?'block':'none';
     document.getElementById('page-award').style.display=p==='award'?'block':'none';
-    if(p==='award'){renderCal();renderStickers();}
+    if(p==='award'){renderCal();renderStickers();renderStats();}
     if(p==='games'){stopGame();document.getElementById('gameMenu').style.display='grid';document.getElementById('gameArea').style.display='none';renderGameCats();}
   };
 });
@@ -1074,6 +1272,7 @@ function flipMemCard(i){
   const card=document.querySelectorAll('.mem-card')[i];
   if(card.classList.contains('flipped')||card.classList.contains('matched'))return;
   card.classList.add('flipped');
+  SFX.flip();
   gs.flipped.push(i);
   if(gs.flipped.length===2){
     gs.moves++;
@@ -1088,17 +1287,17 @@ function flipMemCard(i){
       cards[b].classList.add('matched');
       gs.matched++;
       document.getElementById('memScore').textContent=gs.matched;
+      SFX.match();
       addStar();
       speak(ca.word[0],{rate:0.6});
       setTimeout(()=>{
         gs.flipped=[];gs.locked=false;
         if(gs.matched===gs.total){
           // 通关
-          fireConfetti();
+          fireConfetti();recordGamePlay();SFX.win();
           document.getElementById('celTitle').textContent='🎉 全部配对成功！';
           document.getElementById('celText').textContent=`用了${gs.moves}次翻牌，太厉害了！`;
           document.getElementById('cel').classList.add('show');
-          // 重定义关闭按钮行为
           window._celCloseAction=()=>{exitGame();};
         }
       },500);
@@ -1106,6 +1305,7 @@ function flipMemCard(i){
       // 配对失败
       cards[a].classList.add('wrong');
       cards[b].classList.add('wrong');
+      SFX.bad();
       setTimeout(()=>{
         cards[a].classList.remove('flipped','wrong');
         cards[b].classList.remove('flipped','wrong');
@@ -1150,7 +1350,7 @@ function nextWhackRound(){
   gs.round++;
   if(gs.round>gs.totalRounds){
     // 结束
-    fireConfetti();
+    fireConfetti();recordGamePlay();SFX.win();
     document.getElementById('celTitle').textContent='🎉 游戏结束！';
     document.getElementById('celText').textContent=`打到了${gs.score}个，真棒！`;
     document.getElementById('cel').classList.add('show');
@@ -1214,10 +1414,12 @@ function whackMole(i){
     mEl.classList.add('hit');
     gs.score++;
     document.getElementById('whackScore').textContent=gs.score;
+    SFX.hit();
     addStar();
     speak(mole.word[0],{rate:0.6});
   }else{
     mEl.classList.add('bomb-hit');
+    SFX.miss();
   }
   // 其他地鼠下去
   setTimeout(()=>{
@@ -1237,7 +1439,48 @@ closeCel=function(){
   origCloseCel();
 };
 
-loadList(curCat);renderCats();render();renderTop();
+// ========== 数据备份/恢复 ==========
+function exportData(){
+  const data=JSON.stringify(state,null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const d=new Date();
+  const ds=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  a.href=url;a.download=`lucas-english-backup-${ds}.json`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  setTimeout(()=>showFb('good','<span class="emoji">💾</span>备份成功！文件已下载，请保存好~'),300);
+}
+function importData(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const data=JSON.parse(ev.target.result);
+      if(typeof data!=='object'||data===null)throw new Error('格式错误');
+      if(!confirm('确定要恢复数据吗？当前数据将被覆盖。'))return;
+      state=Object.assign({
+        stars:0,totalStars:0,history:{},streak:0,checkins:{},
+        stickersGot:[],todayDone:false,totalGames:0
+      },data);
+      save();
+      // 重新计算连续天数
+      state.streak=calcStreak();
+      save();
+      renderTop();renderCats();renderGameCats&&renderGameCats();renderStickers();
+      renderCal&&renderCal();renderStats&&renderStats();
+      showFb('good','<span class="emoji">✅</span>数据恢复成功！');
+    }catch(err){
+      alert('恢复失败：文件格式不正确');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+ensureToday();startStudyTimer();loadList(curCat);renderCats();render();renderTop();
 </script>
 </body>
 </html>
