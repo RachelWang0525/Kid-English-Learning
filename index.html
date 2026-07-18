@@ -602,6 +602,7 @@ function speak(text,opts={}){
 }
 function speakEnCn(en,cn){
   speechSynthesis.cancel();
+  const vs=speechSynthesis.getVoices();
   const uEn=new SpeechSynthesisUtterance(en);
   uEn.lang='en-US';uEn.rate=0.5;uEn.pitch=1.6;
   const enV=getBoyVoice();if(enV)uEn.voice=enV;
@@ -697,25 +698,24 @@ function render(){
   // 单词模式
   const w=curWord();const [en,cn,emoji]=w;
   let html=`<button class="shuffle" onclick="shuffleWord()" title="换一个">🔀</button>
-    <button class="speaker" onclick="speak('${en}')">🔊</button>
+    <button class="speaker" id="speakerBtn">🔊</button>
     <div class="card-img">${emoji}</div>`;
 
   if(curMode==='learn'){
     html+=`<div class="card-word">${en}</div><div class="card-cn">${cn}</div>
       <div class="btns" style="margin-top:16px;">
-        <button class="big-btn btn-hear" onclick="speak('${en}')">🔊 听发音</button>
+        <button class="big-btn btn-hear" id="hearBtn">🔊 听发音</button>
       </div>
       <div class="btn-row">
         <button class="big-btn btn-nav" onclick="prevWord()">◀</button>
         <button class="big-btn btn-next" onclick="nextWord()">下一个 ▶</button>
       </div>`;
-    setTimeout(()=>speakEnCn(en,cn),300);
   }else{
     // 单词跟读模式：显示单词，先听再读
     html+=`<div class="card-word" style="color:#ff9a56;">${en}</div>
       <div class="card-cn">${cn}  👂听一听，跟着念</div>
       <div class="btns" style="margin-top:14px;">
-        <button class="big-btn btn-hear" onclick="speakEnCn('${en}','${cn}')">🔊 再听一遍</button>
+        <button class="big-btn btn-hear" id="hearBtn">🔊 再听一遍</button>
       </div>
       <div class="btn-row" style="margin-top:8px;">
         <button class="big-btn btn-speak" id="recBtn" onclick="toggleRec()" style="flex:1;">🎤 按这里跟我读</button>
@@ -723,9 +723,14 @@ function render(){
       <div class="btn-row">
         <button class="big-btn" style="background:#fff;color:#999;box-shadow:0 2px 6px rgba(0,0,0,0.06);font-size:14px;flex:1;" onclick="shuffleWord()">🔀 换一个</button>
       </div>`;
-    setTimeout(()=>speakEnCn(en,cn),400);
   }
   card.innerHTML=html;
+  // 用 JS 绑定，避免中文字符在 onclick 字符串里出问题
+  const speakerBtn=card.querySelector('#speakerBtn');
+  const hearBtn=card.querySelector('#hearBtn');
+  if(speakerBtn)speakerBtn.onclick=()=>speakEnCn(en,cn);
+  if(hearBtn)hearBtn.onclick=()=>speakEnCn(en,cn);
+  setTimeout(()=>speakEnCn(en,cn),curMode==='learn'?300:400);
 }
 
 function renderSentence(card){
@@ -1010,7 +1015,8 @@ function showFb(type,html){
 
 function judge(heard){
   stopRec();
-  const target=curWord()[0].toLowerCase();
+  const [targetEn,targetCn]=curWord();
+  const target=targetEn.toLowerCase();
   let ok=false;
   for(const h of heard){
     if(!h)continue;
@@ -1024,7 +1030,7 @@ function judge(heard){
   }else{
     SFX.bad();
     showFb('bad',`<span class="emoji">🤔</span>${pick(CHEER_RETRY)}<br><span style="font-size:14px;font-weight:400">正确是 ${target}</span>`);
-    setTimeout(()=>speak(target),600);
+    setTimeout(()=>speakEnCn(targetEn,targetCn),600);
   }
 }
 
@@ -1416,7 +1422,7 @@ function nextWhackRound(){
       },idx*200);
     });
     // 先播放发音
-    setTimeout(()=>speak(target[0],{rate:0.6}),600);
+    setTimeout(()=>speakEnCn(target[0],target[1]),600);
   },300);
   // 时间到（2秒后地鼠下去）
   gameTimer=setTimeout(()=>{
