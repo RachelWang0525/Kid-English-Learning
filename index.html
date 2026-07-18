@@ -582,16 +582,35 @@ function genSentence(){
   };
 }
 
+function getBoyVoice(){
+  const vs=speechSynthesis.getVoices();
+  // 优先找女声（Samantha/Karen/Moira/Tessa/Google US English）
+  return vs.find(v=>v.lang.startsWith('en')&&/Samantha|Karen|Moira|Tessa|Fiona|Allison|Ava/i.test(v.name))
+      ||vs.find(v=>v.lang.startsWith('en-US'))
+      ||vs.find(v=>v.lang.startsWith('en'));
+}
 function speak(text,opts={}){
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);
-  u.lang=opts.lang||'en-US';u.rate=opts.rate||0.6;u.pitch=opts.pitch||1.2;
-  const vs=speechSynthesis.getVoices();
+  u.lang=opts.lang||'en-US';
+  u.rate=opts.rate||0.5;   // 慢一点，更清晰好模仿
+  u.pitch=opts.pitch||1.6; // 音调高，模拟童声
   if(!opts.lang||opts.lang.startsWith('en')){
-    const en=vs.find(v=>v.lang.startsWith('en')&&/female|Samantha|Karen|Google/i.test(v.name))||vs.find(v=>v.lang.startsWith('en-US'))||vs.find(v=>v.lang.startsWith('en'));
-    if(en)u.voice=en;
+    const v=getBoyVoice();if(v)u.voice=v;
   }
   speechSynthesis.speak(u);
+}
+function speakEnCn(en,cn){
+  speechSynthesis.cancel();
+  const uEn=new SpeechSynthesisUtterance(en);
+  uEn.lang='en-US';uEn.rate=0.5;uEn.pitch=1.6;
+  const enV=getBoyVoice();if(enV)uEn.voice=enV;
+  const uCn=new SpeechSynthesisUtterance(cn);
+  uCn.lang='zh-CN';uCn.rate=0.9;uCn.pitch=1.1;
+  const cnV=vs.find(v=>v.lang.startsWith('zh'));
+  if(cnV)uCn.voice=cnV;
+  uEn.onend=()=>speechSynthesis.speak(uCn);
+  speechSynthesis.speak(uEn);
 }
 speechSynthesis.getVoices();
 
@@ -690,13 +709,13 @@ function render(){
         <button class="big-btn btn-nav" onclick="prevWord()">◀</button>
         <button class="big-btn btn-next" onclick="nextWord()">下一个 ▶</button>
       </div>`;
-    setTimeout(()=>speak(en),300);
+    setTimeout(()=>speakEnCn(en,cn),300);
   }else{
     // 单词跟读模式：显示单词，先听再读
     html+=`<div class="card-word" style="color:#ff9a56;">${en}</div>
       <div class="card-cn">${cn}  👂听一听，跟着念</div>
       <div class="btns" style="margin-top:14px;">
-        <button class="big-btn btn-hear" onclick="speak('${en}')">🔊 再听一遍</button>
+        <button class="big-btn btn-hear" onclick="speakEnCn('${en}','${cn}')">🔊 再听一遍</button>
       </div>
       <div class="btn-row" style="margin-top:8px;">
         <button class="big-btn btn-speak" id="recBtn" onclick="toggleRec()" style="flex:1;">🎤 按这里跟我读</button>
@@ -704,7 +723,7 @@ function render(){
       <div class="btn-row">
         <button class="big-btn" style="background:#fff;color:#999;box-shadow:0 2px 6px rgba(0,0,0,0.06);font-size:14px;flex:1;" onclick="shuffleWord()">🔀 换一个</button>
       </div>`;
-    setTimeout(()=>speak(en),400);
+    setTimeout(()=>speakEnCn(en,cn),400);
   }
   card.innerHTML=html;
 }
@@ -1297,7 +1316,7 @@ function flipMemCard(i){
       document.getElementById('memScore').textContent=gs.matched;
       SFX.match();
       addStar();
-      speak(ca.word[0],{rate:0.6});
+      speakEnCn(ca.word[0],ca.word[1]);
       setTimeout(()=>{
         gs.flipped=[];gs.locked=false;
         if(gs.matched===gs.total){
@@ -1424,7 +1443,7 @@ function whackMole(i){
     document.getElementById('whackScore').textContent=gs.score;
     SFX.hit();
     addStar();
-    speak(mole.word[0],{rate:0.6});
+    speakEnCn(mole.word[0],mole.word[1]);
   }else{
     mEl.classList.add('bomb-hit');
     SFX.miss();
